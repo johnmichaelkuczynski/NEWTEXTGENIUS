@@ -110,34 +110,60 @@ export class LLMClients {
   }
 
   private buildAnalysisPrompt(text: string, question: string, phase: number = 1, previousScore?: number): string {
-    const scoringInstruction = `SCORING CALIBRATION: 
-Sophisticated philosophical/academic texts with coherent arguments should score 90-99/100.
-Score meaning: N/100 = only (100-N)% of people could do better.
+    const coreInstruction = `EVALUATE INTELLECTUAL SUBSTANCE ONLY:
+Ignore academic format, tone, politeness, citations, and formal structure.
+Reward genuine insight even if rough; penalize bureaucratic conformity even if polished.
 
-95-99/100: Exceptional insight/argument (top 1-5%)
-90-94/100: Strong academic work (top 6-10%) 
-85-89/100: Solid work (top 11-15%)
-80-84/100: Competent work (top 16-20%)
-<80/100: Poor reasoning or major flaws
+SCORING PRINCIPLE:
+- Insight trumps convention
+- Original thinking > academic politeness  
+- Substance > form
+- Breakthrough ideas > safe consensus
 
-For sophisticated texts: Default range is 90-99/100 unless you can cite specific logical flaws.`;
+Score based on:
+- Insight (40%): Novel distinctions, reframing, cross-domain synthesis
+- Generativity (25%): Opens design space, produces testable predictions
+- Mechanism (15%): Proposes causal models, increases explanatory power
+- Coherence (10%): Internal consistency, traceable claim structure
+- Epistemic Posture (10%): Direct claims, minimal hedge-vacuity, low appeal to authority`;
 
     if (phase === 2 && previousScore !== undefined) {
-      return `${scoringInstruction}
+      return `${coreInstruction}
 
 RECALIBRATION: Your previous score was ${previousScore}/100.
-This means ${100 - previousScore}% of people could do better.
 
-For sophisticated philosophical work like this:
-- If you scored <90, cite specific logical flaws with quotes
-- If no major flaws exist, score should be 90-99/100
-- Sophisticated arguments with coherent reasoning should score 90+
+Focus on intellectual substance:
+- Does the text make novel distinctions or propose new mechanisms?
+- Does it generate testable predictions or open new questions?
+- Are there genuine insights regardless of presentation style?
+- If yes to any above, score should be ≥90 regardless of tone/format
+- Only penalize if derivative/bureaucratic (appeals to consensus, hedge-dense, authority-as-proof)
 
 Question: "${question}"
+
+Use two-pass evaluation:
+Pass 1 - Extract core substance (ignore tone/format):
+- Core claims and novel distinctions
+- Mechanisms or causal models proposed  
+- Testable predictions or new questions opened
+- Cross-domain connections made
+- Bureaucratic flags (consensus appeals, hedge-vacuity, authority-as-proof)
+
+Pass 2 - Score on substance only:
 JSON format required:
 {
-  "score": [0-100],
-  "explanation": "[analysis]",
+  "core_claims": ["key claims made"],
+  "novel_moves": ["novel distinctions/reframing"],
+  "mechanisms": ["causal models proposed"],
+  "predictions": ["testable predictions/new questions"],
+  "bureaucracy_flags": ["appeals to consensus/authority, hedge-vacuity"],
+  "insight_score": [0-100],
+  "generativity_score": [0-100], 
+  "mechanism_score": [0-100],
+  "coherence_score": [0-100],
+  "posture_score": [0-100],
+  "final_score": [0-100],
+  "explanation": "[focus on substance, not presentation]",
   "quotes": ["supporting quotes"]
 }
 
@@ -145,18 +171,44 @@ Text:
 ${text}`;
     }
 
-    return `${scoringInstruction}
+    return `${coreInstruction}
 
 Question: "${question}"
 
-Evaluate the text on clarity, argument strength, originality, coherence, and rigor. 
-Sophisticated philosophical work should score 90-99/100.
-For scores <90: cite specific flaws with quotes.
+Use two-pass evaluation:
+
+Pass 1 - Extract core substance (ignore tone, format, politeness):
+- What novel distinctions or reframing does this offer?
+- What mechanisms or causal models are proposed?
+- What testable predictions or new questions emerge?
+- What cross-domain connections are made?
+- Any bureaucratic flags (consensus appeals, hedge-vacuity, authority-as-proof)?
+
+Pass 2 - Score dimensions based on substance only:
+- Insight (40%): Quality of novel distinctions and reframing
+- Generativity (25%): Opens new questions, design space, predictions  
+- Mechanism (15%): Causal models, explanatory leverage
+- Coherence (10%): Internal consistency, traceable claims
+- Posture (10%): Direct claims, minimal hedging, low authority appeals
+
+Final score = weighted average, with floors/caps:
+- If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90 regardless of tone
+- If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75 even if polished
 
 JSON format required:
 {
-  "score": [0-100],
-  "explanation": "[analysis]",
+  "core_claims": ["key claims made"],
+  "novel_moves": ["novel distinctions/reframing"], 
+  "mechanisms": ["causal models proposed"],
+  "predictions": ["testable predictions/new questions"],
+  "bureaucracy_flags": ["appeals to consensus/authority, hedge-vacuity"],
+  "insight_score": [0-100],
+  "generativity_score": [0-100],
+  "mechanism_score": [0-100], 
+  "coherence_score": [0-100],
+  "posture_score": [0-100],
+  "final_score": [0-100],
+  "explanation": "[analyze substance, ignore presentation style]",
   "quotes": ["supporting quotes"]
 }
 
