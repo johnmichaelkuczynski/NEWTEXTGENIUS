@@ -36,7 +36,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!FileParser.validateFileType(req.file.originalname)) {
         return res.status(400).json({ 
-          message: `Unsupported file type: .${extension}. Please use TXT, DOC, or DOCX files.` 
+          message: `Unsupported file type: .${extension}. Please use TXT, DOC, DOCX, or PDF files.` 
+        });
+      }
+
+      // Add MIME type validation for better security
+      if (!FileParser.validateMimeType(req.file.originalname, req.file.mimetype)) {
+        return res.status(400).json({ 
+          message: "Invalid file format. Please ensure the file is a valid TXT, DOC, DOCX, or PDF file." 
         });
       }
 
