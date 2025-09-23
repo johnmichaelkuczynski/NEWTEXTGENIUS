@@ -33,10 +33,11 @@ export class FileParser {
               throw new Error('PDF appears to be empty or contains no readable text. This may be a scanned PDF (image-based) which requires OCR processing.');
             }
             
-            // Clean up the extracted text - remove excessive whitespace and normalize line breaks
+            // Clean up the extracted text - normalize line breaks while preserving structure
             const processedText = extractedText
-              .replace(/\s+/g, ' ') // Replace multiple whitespace with single space
-              .replace(/\n\s*\n/g, '\n\n') // Normalize paragraph breaks
+              .replace(/\r\n/g, '\n') // Normalize line endings
+              .replace(/\n{3,}/g, '\n\n') // Replace 3+ newlines with double newline
+              .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
               .trim();
             
             console.log(`Successfully parsed PDF: ${processedText.length} characters extracted`);
@@ -85,6 +86,22 @@ export class FileParser {
 
   static validatePDFMimeType(mimeType: string): boolean {
     return mimeType === 'application/pdf';
+  }
+
+  static validateMimeType(filename: string, mimeType: string): boolean {
+    const extension = filename.toLowerCase().split('.').pop();
+    switch (extension) {
+      case 'pdf':
+        return mimeType === 'application/pdf';
+      case 'txt':
+        return mimeType.startsWith('text/');
+      case 'doc':
+        return mimeType === 'application/msword';
+      case 'docx':
+        return mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      default:
+        return false;
+    }
   }
 
   static getFileSize(file: Buffer): number {
