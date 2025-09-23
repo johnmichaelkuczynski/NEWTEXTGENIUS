@@ -1,0 +1,25 @@
+What is literal meaning?
+Where complex expressions are concerned, there is no limit to how much literal and understood meaning may diverge from each other. But where simple expressions are concerned, literal and understood meaning must coalesce. It makes no sense to suppose that people could be systematically wrong as to what “red” meant. If people thought that “red” meant what is in fact meant by “blue,” then “red” would have that meaning. Systematic, widespread error is impossible where semantically simple expressions are concerned. This gives us a way of understanding what literal meaning is.
+Even though there can be widespread, systematic misinterpretations of sentences, those misinterpretations do not arise as a result of people failing to know what the simple parts of sentences mean. They arise as a result of people not knowing how to put those meanings together. So to the extent that its meaning is fixed by the fact that it has the form ‹...Socrates...›, people (English speakers) do systematically understand “Socrates was more wise than Plato, but he was less sharp then Aristotle”; and to the extent that its meaning was determined by its having the form ‹...wise...›, people do understand that sentence; and so on. So far as that sentence is systematically misunderstood, it is because people are having trouble putting the meanings of its constituents together—it is because they’re having trouble figuring out how those meanings ought to be put together.
+What a simple expression literally means is determined by what it is that a sentence means by virtue of containing it. Since, where simple expressions are concerned, what people take literal meaning to be coincides with what it really is, a simple expression’s literal meaning coincides with what it is that, in virtue of containing that expression, sentences are taken to mean. So a simple expression’s literal meaning is given by a statement saying what it is that, by virtue of containing it, sentences are taken to mean; and a complex expression’s literal meaning is a function, in the mathematical sense, of the meanings of its parts.
+Here’s an illustration. “Socrates” is a simple expression. So what people think it means must ultimately coincide with what it actually means. So it refers to Socrates only because people think it refers to Socrates and, therefore, only because people think that “Socrates is intelligent” attributes
+ 
+intelligence to Socrates and, in general, that ‹...Socrates...› attributes...x...to Socrates.
+Of course, people don’t always take utterances of ‹...Socrates... › to be attempts to say that Socrates has...x... It might be clear from the speaker’s tone that what he really meant when in saying “Socrates was wise” was that Socrates was not wise. But to the extent that their belief that “Socrates” refers to Socrates is determinative of what people take the meanings of utterances of the form ‹...Socrates...› to be saying, what they take it to be saying is that Socrates has...x... That is what it is for them to take “Socrates” to refer to Socrates. And their taking “Socrates” to refer to Socrates is for “Socrates” to refer to Socrates, given that “Socrates,” being a simple expression, has the semantics that people think it has. The same thing mutatis mutandis is true of every other simple expression.
+Bearing these points in mind, let CE be any complex expression, and let e1...en be the simple expressions composing it. How people interpret CE may diverge from its literal meaning. But when this happens, it’s because what it is taken to mean diverges from what, given what people believe its simple parts to literally mean, people are disposed to take it to mean.
+Since what people take simple expressions to mean is what they mean, this is the same as saying the following. A divergence between
+(i)	A sentence’s literal meaning
+and
+(ii)	That sentence’s understood meaning
+is the same thing as a divergence between
+(a)	That sentence’s literal meaning
+ 
+and
+ 
+
+(b)	What it is that, given their (correct) beliefs as to what its simple parts literally mean, people are disposed to take that sentence’s literal meaning to be.
+The literal meaning of a complex expression is a function of two things:
+ 
+(i) the meanings of its simple parts, and (ii) the order in which those parts are arranged. To say what literal meaning is in general, we need to say what it is for a simple expression to have a given literal meaning. Given the points just made, we can do this. Where simple expressions are concerned, literal and
+ 
+communicated meaning coincide (ultimately)—in other words, such expressions mean what people take them to mean. And where complex expressions are concerned, literal and communicated meaning may diverge, but literal meaning nonetheless coincides with what, given what the simple components of the expression in question literally mean, people are disposed to take it to mean.

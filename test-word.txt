@@ -1,0 +1,7 @@
+Sample Word Document Content
+
+This is a test document to simulate Word document content. In a real scenario, this would be extracted from a .docx file using the mammoth library.
+
+The document contains multiple paragraphs with various formatting. The mammoth library extracts raw text from Word documents, removing formatting but preserving the essential textual content.
+
+This test verifies that our Word document parsing functionality works correctly and can extract meaningful text for analysis by the Originality Meter system.

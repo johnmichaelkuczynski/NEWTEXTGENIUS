@@ -1,0 +1,7 @@
+This is a test document for the Originality Meter application. 
+
+The purpose of this text is to verify that file upload functionality works correctly. This document contains several sentences that can be analyzed for originality, intelligence, cogency, and overall quality.
+
+We are testing the system's ability to process uploaded text files and extract meaningful content for analysis. The text should be parsed correctly and made available to the analysis engine.
+
+This test document demonstrates various aspects of written communication including clear exposition, logical structure, and purposeful content organization.
