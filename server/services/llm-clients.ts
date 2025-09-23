@@ -245,11 +245,23 @@ ${text}`;
       }
       
       const parsed = JSON.parse(jsonText);
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || content.text,
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
+      
+      // Handle new format with dimensional scoring
+      if (parsed.final_score !== undefined) {
+        const score = this.calculateWeightedScore(parsed);
+        return {
+          score: Math.max(0, Math.min(100, score)),
+          explanation: parsed.explanation || content.text,
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      } else {
+        // Fallback for old format
+        return {
+          score: Math.max(0, Math.min(100, parsed.score || 0)),
+          explanation: parsed.explanation || content.text,
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      }
     } catch (error) {
       console.error('JSON parsing failed, returning fallback response:', error);
       // Fallback with appropriate score for sophisticated texts (detect from input)
@@ -282,11 +294,23 @@ ${text}`;
 
     try {
       const parsed = JSON.parse(content);
-      return {
-        score: Math.max(0, Math.min(100, parsed.score)),
-        explanation: parsed.explanation,
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
+      
+      // Handle new format with dimensional scoring
+      if (parsed.final_score !== undefined) {
+        const score = this.calculateWeightedScore(parsed);
+        return {
+          score: Math.max(0, Math.min(100, score)),
+          explanation: parsed.explanation,
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      } else {
+        // Fallback for old format
+        return {
+          score: Math.max(0, Math.min(100, parsed.score)),
+          explanation: parsed.explanation,
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      }
     } catch (error) {
       throw new Error('Failed to parse OpenAI response as JSON');
     }
@@ -371,11 +395,23 @@ ${text}`;
 
         try {
           const parsed = JSON.parse(cleanedContent);
-          return {
-            score: Math.max(0, Math.min(100, parsed.score || 0)),
-            explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-            quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-          };
+          
+          // Handle new format with dimensional scoring  
+          if (parsed.final_score !== undefined) {
+            const score = this.calculateWeightedScore(parsed);
+            return {
+              score: Math.max(0, Math.min(100, score)),
+              explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+              quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+            };
+          } else {
+            // Fallback for old format
+            return {
+              score: Math.max(0, Math.min(100, parsed.score || 0)),
+              explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+              quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+            };
+          }
         } catch (error) {
           console.error('Perplexity JSON parsing failed on retry:', error);
           return {
@@ -405,11 +441,23 @@ ${text}`;
 
     try {
       const parsed = JSON.parse(cleanedContent);
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
+      
+      // Handle new format with dimensional scoring
+      if (parsed.final_score !== undefined) {
+        const score = this.calculateWeightedScore(parsed);
+        return {
+          score: Math.max(0, Math.min(100, score)),
+          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      } else {
+        // Fallback for old format
+        return {
+          score: Math.max(0, Math.min(100, parsed.score || 0)),
+          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      }
     } catch (error) {
       console.error('Perplexity JSON parsing failed:', { content, cleanedContent, error });
       // Fallback response with appropriate scoring (detect from input)
@@ -472,11 +520,23 @@ ${text}`;
 
     try {
       const parsed = JSON.parse(cleanedContent);
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
+      
+      // Handle new format with dimensional scoring
+      if (parsed.final_score !== undefined) {
+        const score = this.calculateWeightedScore(parsed);
+        return {
+          score: Math.max(0, Math.min(100, score)),
+          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      } else {
+        // Fallback for old format
+        return {
+          score: Math.max(0, Math.min(100, parsed.score || 0)),
+          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+        };
+      }
     } catch (error) {
       console.error('DeepSeek JSON parsing failed:', { content, cleanedContent, error });
       // Fallback response with appropriate scoring (detect from input)
@@ -489,12 +549,54 @@ ${text}`;
     }
   }
 
+  private calculateWeightedScore(parsed: any): number {
+    // Extract dimensional scores
+    const insight = parsed.insight_score || 0;
+    const generativity = parsed.generativity_score || 0; 
+    const mechanism = parsed.mechanism_score || 0;
+    const coherence = parsed.coherence_score || 0;
+    const posture = parsed.posture_score || 0;
+    
+    // Calculate weighted average: insight(40%) + generativity(25%) + mechanism(15%) + coherence(10%) + posture(10%)
+    let weightedScore = (insight * 0.4) + (generativity * 0.25) + (mechanism * 0.15) + (coherence * 0.1) + (posture * 0.1);
+    
+    // Apply floors and caps based on novel moves and bureaucracy flags
+    const novelMoves = Array.isArray(parsed.novel_moves) ? parsed.novel_moves.length : 0;
+    const bureaucracyFlags = Array.isArray(parsed.bureaucracy_flags) ? parsed.bureaucracy_flags.length : 0;
+    
+    // Floor: If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90
+    if (novelMoves >= 2 || (insight >= 85 && generativity >= 80)) {
+      weightedScore = Math.max(weightedScore, 90);
+    }
+    
+    // Cap: If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75
+    if (bureaucracyFlags >= 2 && novelMoves < 2) {
+      weightedScore = Math.min(weightedScore, 75);
+    }
+    
+    // Start with final_score if provided, otherwise use calculated weighted score
+    let baseScore = typeof parsed.final_score === 'number' ? parsed.final_score : weightedScore;
+    
+    // ALWAYS apply floors and caps regardless of source
+    // Floor: If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90
+    if (novelMoves >= 2 || (insight >= 85 && generativity >= 80)) {
+      baseScore = Math.max(baseScore, 90);
+    }
+    
+    // Cap: If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75
+    if (bureaucracyFlags >= 2 && novelMoves < 2) {
+      baseScore = Math.min(baseScore, 75);
+    }
+    
+    return Math.max(0, Math.min(100, baseScore));
+  }
+  
   private isTextSophisticated(text: string): boolean {
-    return text && text.length > 500 && 
+    return Boolean(text && text.length > 500 && 
            (text.toLowerCase().includes('argument') ||
             text.toLowerCase().includes('analysis') ||
             text.toLowerCase().includes('philosophy') ||
             text.toLowerCase().includes('theory') ||
-            text.toLowerCase().includes('reasoning'));
+            text.toLowerCase().includes('reasoning')));
   }
 }
