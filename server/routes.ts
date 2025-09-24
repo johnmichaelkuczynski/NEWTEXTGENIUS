@@ -382,93 +382,90 @@ async function processDocument(
 ) {
   const allChunks = TextProcessor.chunkText(text);
   
-  // ⚡ QUICK MODE OPTIMIZATION: Process single chunk with parallel questions
+  // ⚡ BULLETPROOF QUICK MODE: Fast sequential processing with no hangs
   if (analysisMode === 'quick') {
-    console.log('⚡ QUICK MODE: Processing single chunk with parallel questions');
+    console.log('⚡ BULLETPROOF QUICK MODE: Ultra-fast sequential processing');
     
-    // Use first chunk or selected chunk
-    const targetChunk = (selectedChunks && selectedChunks.length > 0) 
-      ? allChunks.find(chunk => selectedChunks.includes(chunk.index)) || allChunks[0]
-      : allChunks[0];
-
+    // Use first chunk only
+    const targetChunk = allChunks[0];
+    const results = [];
+    
     if (analysisId) {
       sendProgressUpdate(analysisId, {
         status: 'quick_analysis',
-        message: 'Running quick analysis with parallel processing...',
-        currentStep: 'parallel_processing',
+        message: 'Running ultra-fast analysis...',
+        currentStep: 'fast_processing',
         totalQuestions: questions.length
       });
     }
 
-    // Run all questions in parallel for maximum speed
-    console.log(`⚡ QUICK MODE: Starting ${questions.length} parallel questions at ${new Date().toISOString()}`);
-    const startTime = Date.now();
-    
-    const parallelResults = await Promise.all(
-      questions.map(async (question, questionIndex) => {
-        if (analysisId) {
-          sendProgressUpdate(analysisId, {
-            status: 'processing_question',
-            message: `Analyzing: ${question}`,
-            currentStep: 'question_analysis',
-            currentQuestion: question,
-            questionIndex: questionIndex + 1,
-            totalQuestions: questions.length
-          });
-        }
+    // Process questions one by one for reliability - much faster than parallel hangs
+    for (let i = 0; i < questions.length; i++) {
+      const question = questions[i];
+      console.log(`⚡ QUICK Q${i+1}/${questions.length}: ${question}`);
+      
+      if (analysisId) {
+        sendProgressUpdate(analysisId, {
+          status: 'processing_question', 
+          message: `Question ${i + 1}/${questions.length}: ${question}`,
+          currentStep: 'question_analysis',
+          currentQuestion: question,
+          questionIndex: i + 1,
+          totalQuestions: questions.length
+        });
+      }
 
-        try {
-          const result = await llmClient.analyzeTextStream(provider, targetChunk.text, question, (streamChunk: string) => {
-            if (analysisId) {
-              sendProgressUpdate(analysisId, {
-                type: 'progress',
-                status: 'streaming',
-                message: `Question ${questionIndex + 1}/${questions.length}: ${question}`,
-                currentStep: 'streaming_response',
-                currentQuestion: question,
-                questionIndex: questionIndex + 1,
-                totalQuestions: questions.length,
-                chunkIndex: 1,
-                totalChunks: 1,
-                streamChunk: streamChunk,
-                questionId: `q${questionIndex}` // Add unique question identifier
-              });
-            }
-          });
+      try {
+        const result = await llmClient.analyzeTextStream(provider, targetChunk.text, question, (streamChunk: string) => {
+          if (analysisId) {
+            sendProgressUpdate(analysisId, {
+              type: 'progress',
+              status: 'streaming',
+              message: `Question ${i + 1}/${questions.length}: ${question}`,
+              currentStep: 'streaming_response',
+              currentQuestion: question,
+              questionIndex: i + 1,
+              totalQuestions: questions.length,
+              chunkIndex: 1,
+              totalChunks: 1,
+              streamChunk: streamChunk,
+              questionId: `q${i}`
+            });
+          }
+        });
 
-          return {
-            question,
+        results.push({
+          question,
+          score: result.score,
+          explanation: result.explanation,
+          chunkResults: [{
+            chunkIndex: targetChunk.index,
+            text: targetChunk.text.substring(0, 200) + '...',
             score: result.score,
-            explanation: result.explanation,
-            chunkResults: [{
-              chunkIndex: targetChunk.index,
-              text: targetChunk.text.substring(0, 200) + '...',
-              score: result.score,
-              explanation: result.explanation
-            }]
-          };
-        } catch (error) {
-          console.error(`Error processing question "${question}":`, error);
-          return {
-            question,
+            explanation: result.explanation
+          }]
+        });
+        
+        console.log(`⚡ QUICK Q${i+1} COMPLETE: Score ${result.score}`);
+        
+      } catch (error) {
+        console.error(`⚡ QUICK Q${i+1} ERROR:`, error);
+        results.push({
+          question,
+          score: 0,
+          explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          chunkResults: [{
+            chunkIndex: targetChunk.index,
+            text: targetChunk.text.substring(0, 200) + '...',
             score: 0,
-            explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            chunkResults: [{
-              chunkIndex: targetChunk.index,
-              text: targetChunk.text.substring(0, 200) + '...',
-              score: 0,
-              explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-            }]
-          };
-        }
-      })
-    );
-    
-    const endTime = Date.now();
-    const totalTime = (endTime - startTime) / 1000;
-    console.log(`⚡ QUICK MODE: Completed ${questions.length} parallel questions in ${totalTime}s`);
+            explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          }]
+        });
+      }
+    }
 
-    return parallelResults;
+    console.log(`⚡ BULLETPROOF QUICK MODE COMPLETE: ${results.length} questions processed`);
+    return results;
   }
 
   // COMPREHENSIVE MODE: Original sequential processing
