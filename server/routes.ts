@@ -449,7 +449,7 @@ async function processDocument(
         currentQuestion: question,
         questionIndex: questionIndex + 1,
         totalQuestions: questions.length,
-        score: amalgamatedResult.averageScore
+        score: amalgamatedResult.score
       });
     }
   }
