@@ -146,10 +146,10 @@ export default function Home() {
 
   const getLLMDisplayName = (provider: string) => {
     switch (provider) {
-      case 'anthropic': return 'Anthropic';
-      case 'openai': return 'OpenAI';
-      case 'perplexity': return 'Perplexity';
-      case 'deepseek': return 'DeepSeek';
+      case 'anthropic': return 'ZHI 2';
+      case 'openai': return 'ZHI 3';
+      case 'perplexity': return 'ZHI 4';
+      case 'deepseek': return 'ZHI 1';
       default: return provider;
     }
   };
