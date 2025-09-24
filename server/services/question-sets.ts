@@ -51,8 +51,12 @@ export function getQuestions(parameter: string, mode: 'quick' | 'comprehensive',
   const questions = questionSets[parameter as keyof typeof questionSets] || questionSets.originality;
   
   if (mode === 'quick') {
-    // Return first 3 questions for quick mode (Phase 1 only)
-    return questions.slice(0, 3);
+    // Ultra-fast questions for quick mode - require only short responses
+    return [
+      'Rate the originality 0-100. Then give ONE sentence explanation.',
+      'Rate the intelligence 0-100. Then give ONE sentence explanation.', 
+      'Rate the overall quality 0-100. Then give ONE sentence explanation.'
+    ];
   }
   
   // For comprehensive mode, return questions based on phase

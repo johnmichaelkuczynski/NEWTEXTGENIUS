@@ -401,6 +401,9 @@ async function processDocument(
     }
 
     // Run all questions in parallel for maximum speed
+    console.log(`⚡ QUICK MODE: Starting ${questions.length} parallel questions at ${new Date().toISOString()}`);
+    const startTime = Date.now();
+    
     const parallelResults = await Promise.all(
       questions.map(async (question, questionIndex) => {
         if (analysisId) {
@@ -460,6 +463,10 @@ async function processDocument(
         }
       })
     );
+    
+    const endTime = Date.now();
+    const totalTime = (endTime - startTime) / 1000;
+    console.log(`⚡ QUICK MODE: Completed ${questions.length} parallel questions in ${totalTime}s`);
 
     return parallelResults;
   }
@@ -534,7 +541,8 @@ async function processDocument(
         });
 
         // Wait 3 seconds between chunks to respect rate limits but improve speed
-        if (i < chunksToProcess.length - 1) {
+        // Skip delays in quick mode for maximum speed
+        if (i < chunksToProcess.length - 1 && analysisMode !== 'quick') {
           await TextProcessor.delay(3);
         }
       } catch (error) {
