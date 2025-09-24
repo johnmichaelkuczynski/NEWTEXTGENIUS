@@ -154,6 +154,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
 
     sendEvent({ type: 'connected', analysisId });
+    
+    // Register this stream for progress updates
+    activeStreams.set(analysisId, sendEvent);
 
     // Send heartbeat to keep connection alive
     const heartbeatInterval = setInterval(() => {
@@ -197,6 +200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       isConnected = false;
       clearInterval(pollInterval);
       clearInterval(heartbeatInterval);
+      activeStreams.delete(analysisId); // Remove from active streams
     };
 
     req.on('close', cleanup);
@@ -234,6 +238,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
+// Global map to track active streams for real-time progress updates
+const activeStreams = new Map<string, (data: any) => boolean>();
+
+function sendProgressUpdate(analysisId: string, progressData: any) {
+  const sendEvent = activeStreams.get(analysisId);
+  if (sendEvent) {
+    sendEvent({
+      type: 'progress',
+      analysisId,
+      ...progressData
+    });
+  }
+}
+
 async function processAnalysisAsync(
   analysisId: string, 
   request: AnalysisRequest
@@ -244,13 +262,27 @@ async function processAnalysisAsync(
     const llmClient = new LLMClients();
     const questions = getQuestions(request.evaluationParam, request.analysisMode);
 
+    sendProgressUpdate(analysisId, {
+      status: 'starting',
+      message: 'Initializing cognitive protocol analysis...',
+      currentStep: 'preparation'
+    });
+
     // Process document 1
+    sendProgressUpdate(analysisId, {
+      status: 'processing_document_1',
+      message: 'Starting analysis of primary document...',
+      currentStep: 'document_1',
+      totalQuestions: questions.length
+    });
+
     const doc1Results = await processDocument(
       request.document1Text, 
       questions, 
       request.llmProvider, 
       llmClient,
-      request.selectedChunks1
+      request.selectedChunks1,
+      analysisId // Pass analysisId for progress updates
     );
 
     let doc2Results = undefined;
@@ -258,13 +290,27 @@ async function processAnalysisAsync(
 
     // Process document 2 if dual mode
     if (request.documentMode === 'dual' && request.document2Text) {
+      sendProgressUpdate(analysisId, {
+        status: 'processing_document_2',
+        message: 'Starting analysis of secondary document...',
+        currentStep: 'document_2',
+        totalQuestions: questions.length
+      });
+
       doc2Results = await processDocument(
         request.document2Text, 
         questions, 
         request.llmProvider, 
         llmClient,
-        request.selectedChunks2
+        request.selectedChunks2,
+        analysisId // Pass analysisId for progress updates
       );
+
+      sendProgressUpdate(analysisId, {
+        status: 'generating_comparison',
+        message: 'Generating document comparison analysis...',
+        currentStep: 'comparison'
+      });
 
       // Generate comparison
       comparisonResults = await generateComparison(
@@ -278,6 +324,12 @@ async function processAnalysisAsync(
       );
     }
 
+    sendProgressUpdate(analysisId, {
+      status: 'finalizing',
+      message: 'Calculating final scores and generating report...',
+      currentStep: 'finalization'
+    });
+
     // Calculate overall score
     const overallScore = calculateOverallScore(doc1Results, doc2Results);
     const processingTime = Math.round((Date.now() - startTime) / 1000);
@@ -288,6 +340,14 @@ async function processAnalysisAsync(
       document2Results: doc2Results,
       comparisonResults
     }, overallScore, processingTime);
+
+    sendProgressUpdate(analysisId, {
+      status: 'completed',
+      message: 'Analysis completed successfully!',
+      currentStep: 'completed',
+      overallScore,
+      processingTime
+    });
 
   } catch (error) {
     console.error('Analysis processing error:', error);
@@ -319,11 +379,39 @@ async function processDocument(
 
   const results = [];
 
-  for (const question of questions) {
+  for (let questionIndex = 0; questionIndex < questions.length; questionIndex++) {
+    const question = questions[questionIndex];
     const chunkResults = [];
+
+    // Send progress update for current question
+    if (analysisId) {
+      sendProgressUpdate(analysisId, {
+        status: 'processing_question',
+        message: `Analyzing: ${question}`,
+        currentStep: 'question_analysis',
+        currentQuestion: question,
+        questionIndex: questionIndex + 1,
+        totalQuestions: questions.length,
+        chunksToProcess: chunksToProcess.length
+      });
+    }
 
     for (let i = 0; i < chunksToProcess.length; i++) {
       const chunk = chunksToProcess[i];
+      
+      // Send progress for current chunk within question
+      if (analysisId) {
+        sendProgressUpdate(analysisId, {
+          status: 'processing_chunk',
+          message: `Question ${questionIndex + 1}/${questions.length}: Processing chunk ${i + 1}/${chunksToProcess.length}`,
+          currentStep: 'chunk_analysis',
+          currentQuestion: question,
+          questionIndex: questionIndex + 1,
+          totalQuestions: questions.length,
+          chunkIndex: i + 1,
+          totalChunks: chunksToProcess.length
+        });
+      }
       
       try {
         const result = await llmClient.analyzeText(provider, chunk.text, question);
@@ -350,6 +438,19 @@ async function processDocument(
     // Amalgamate results for this question
     const amalgamatedResult = amalgamateChunkResults(question, chunkResults);
     results.push(amalgamatedResult);
+
+    // Send progress update after completing each question
+    if (analysisId) {
+      sendProgressUpdate(analysisId, {
+        status: 'question_completed',
+        message: `Completed: ${question}`,
+        currentStep: 'question_completed',
+        currentQuestion: question,
+        questionIndex: questionIndex + 1,
+        totalQuestions: questions.length,
+        score: amalgamatedResult.averageScore
+      });
+    }
   }
 
   return results;
