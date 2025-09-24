@@ -88,19 +88,24 @@ export function useAnalysisStream(analysisId: string | null) {
                 return updated;
               });
             } else if (data.status === 'processing_question') {
-              // New question started, clear streaming text
-              setStreamingText('');
-              setProgress({
-                status: data.status || 'processing',
-                message: data.message || 'Processing...',
-                currentStep: data.currentStep || 'unknown',
-                currentQuestion: data.currentQuestion,
-                questionIndex: data.questionIndex,
-                totalQuestions: data.totalQuestions,
-                chunkIndex: data.chunkIndex,
-                totalChunks: data.totalChunks,
-                score: data.score,
-                streamingText: ''
+              // New question started, add separator but keep accumulated text
+              setStreamingText(prev => {
+                const separator = prev ? '\n\n---\n\n' : '';
+                const questionHeader = `Question ${data.questionIndex}/${data.totalQuestions}: ${data.currentQuestion}\n\n`;
+                const updated = prev + separator + questionHeader;
+                setProgress({
+                  status: data.status || 'processing',
+                  message: data.message || 'Processing...',
+                  currentStep: data.currentStep || 'unknown',
+                  currentQuestion: data.currentQuestion,
+                  questionIndex: data.questionIndex,
+                  totalQuestions: data.totalQuestions,
+                  chunkIndex: data.chunkIndex,
+                  totalChunks: data.totalChunks,
+                  score: data.score,
+                  streamingText: updated
+                });
+                return updated;
               });
             } else {
               // Other progress updates

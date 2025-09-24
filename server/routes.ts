@@ -261,8 +261,17 @@ async function processAnalysisAsync(
   const startTime = Date.now();
   
   try {
+    // Debug analysis mode detection
+    console.log(`🔍 RAW REQUEST analysisMode: "${request.analysisMode}" (type: ${typeof request.analysisMode})`);
+    console.log(`🔍 FULL REQUEST:`, JSON.stringify(request, null, 2));
+    
+    // Normalize analysisMode for consistency
+    const analysisMode = (request.analysisMode || 'comprehensive').toLowerCase() as 'quick' | 'comprehensive';
+    console.log(`🔍 NORMALIZED Analysis Mode: "${analysisMode}" (original: "${request.analysisMode}")`);
+    console.log(`🔍 WILL TRIGGER QUICK MODE: ${analysisMode === 'quick'}`);
+    
     const llmClient = new LLMClients();
-    const questions = getQuestions(request.evaluationParam, request.analysisMode);
+    const questions = getQuestions(request.evaluationParam, analysisMode);
 
     sendProgressUpdate(analysisId, {
       status: 'starting',
@@ -284,7 +293,8 @@ async function processAnalysisAsync(
       request.llmProvider, 
       llmClient,
       request.selectedChunks1,
-      analysisId // Pass analysisId for progress updates
+      analysisId, // Pass analysisId for progress updates
+      analysisMode // Pass normalized analysis mode for quick optimization
     );
 
     let doc2Results = undefined;
@@ -305,7 +315,8 @@ async function processAnalysisAsync(
         request.llmProvider, 
         llmClient,
         request.selectedChunks2,
-        analysisId // Pass analysisId for progress updates
+        analysisId, // Pass analysisId for progress updates
+        analysisMode // Pass normalized analysis mode for quick optimization
       );
 
       sendProgressUpdate(analysisId, {
@@ -366,11 +377,94 @@ async function processDocument(
   provider: string,
   llmClient: LLMClients,
   selectedChunks?: number[],
-  analysisId?: string
+  analysisId?: string,
+  analysisMode: string = 'comprehensive'
 ) {
   const allChunks = TextProcessor.chunkText(text);
   
-  // If specific chunks are selected, only process those
+  // ⚡ QUICK MODE OPTIMIZATION: Process single chunk with parallel questions
+  if (analysisMode === 'quick') {
+    console.log('⚡ QUICK MODE: Processing single chunk with parallel questions');
+    
+    // Use first chunk or selected chunk
+    const targetChunk = (selectedChunks && selectedChunks.length > 0) 
+      ? allChunks.find(chunk => selectedChunks.includes(chunk.index)) || allChunks[0]
+      : allChunks[0];
+
+    if (analysisId) {
+      sendProgressUpdate(analysisId, {
+        status: 'quick_analysis',
+        message: 'Running quick analysis with parallel processing...',
+        currentStep: 'parallel_processing',
+        totalQuestions: questions.length
+      });
+    }
+
+    // Run all questions in parallel for maximum speed
+    const parallelResults = await Promise.all(
+      questions.map(async (question, questionIndex) => {
+        if (analysisId) {
+          sendProgressUpdate(analysisId, {
+            status: 'processing_question',
+            message: `Analyzing: ${question}`,
+            currentStep: 'question_analysis',
+            currentQuestion: question,
+            questionIndex: questionIndex + 1,
+            totalQuestions: questions.length
+          });
+        }
+
+        try {
+          const result = await llmClient.analyzeTextStream(provider, targetChunk.text, question, (streamChunk: string) => {
+            if (analysisId) {
+              sendProgressUpdate(analysisId, {
+                type: 'progress',
+                status: 'streaming',
+                message: `Question ${questionIndex + 1}/${questions.length}: ${question}`,
+                currentStep: 'streaming_response',
+                currentQuestion: question,
+                questionIndex: questionIndex + 1,
+                totalQuestions: questions.length,
+                chunkIndex: 1,
+                totalChunks: 1,
+                streamChunk: streamChunk,
+                questionId: `q${questionIndex}` // Add unique question identifier
+              });
+            }
+          });
+
+          return {
+            question,
+            score: result.score,
+            explanation: result.explanation,
+            chunkResults: [{
+              chunkIndex: targetChunk.index,
+              text: targetChunk.text.substring(0, 200) + '...',
+              score: result.score,
+              explanation: result.explanation
+            }]
+          };
+        } catch (error) {
+          console.error(`Error processing question "${question}":`, error);
+          return {
+            question,
+            score: 0,
+            explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            chunkResults: [{
+              chunkIndex: targetChunk.index,
+              text: targetChunk.text.substring(0, 200) + '...',
+              score: 0,
+              explanation: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+            }]
+          };
+        }
+      })
+    );
+
+    return parallelResults;
+  }
+
+  // COMPREHENSIVE MODE: Original sequential processing
   const chunksToProcess = selectedChunks && selectedChunks.length > 0 
     ? allChunks.filter(chunk => selectedChunks.includes(chunk.index))
     : allChunks;
