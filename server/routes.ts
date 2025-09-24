@@ -419,7 +419,7 @@ async function processDocument(
           // Send streaming text to the frontend
           if (analysisId) {
             sendProgressUpdate(analysisId, {
-              type: 'streaming_text',
+              type: 'progress',
               status: 'streaming',
               message: `Question ${questionIndex + 1}/${questions.length}: Processing chunk ${i + 1}/${chunksToProcess.length}`,
               currentStep: 'streaming_response',

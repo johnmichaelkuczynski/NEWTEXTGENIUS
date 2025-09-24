@@ -70,25 +70,53 @@ export function useAnalysisStream(analysisId: string | null) {
           case 'progress':
             // Handle streaming text updates
             if (data.streamChunk && data.status === 'streaming') {
-              setStreamingText(prev => prev + data.streamChunk);
+              setStreamingText(prev => {
+                const updated = prev + data.streamChunk;
+                // Update progress state with synchronized streaming text
+                setProgress({
+                  status: data.status || 'processing',
+                  message: data.message || 'Processing...',
+                  currentStep: data.currentStep || 'unknown',
+                  currentQuestion: data.currentQuestion,
+                  questionIndex: data.questionIndex,
+                  totalQuestions: data.totalQuestions,
+                  chunkIndex: data.chunkIndex,
+                  totalChunks: data.totalChunks,
+                  score: data.score,
+                  streamingText: updated
+                });
+                return updated;
+              });
             } else if (data.status === 'processing_question') {
               // New question started, clear streaming text
               setStreamingText('');
+              setProgress({
+                status: data.status || 'processing',
+                message: data.message || 'Processing...',
+                currentStep: data.currentStep || 'unknown',
+                currentQuestion: data.currentQuestion,
+                questionIndex: data.questionIndex,
+                totalQuestions: data.totalQuestions,
+                chunkIndex: data.chunkIndex,
+                totalChunks: data.totalChunks,
+                score: data.score,
+                streamingText: ''
+              });
+            } else {
+              // Other progress updates
+              setProgress({
+                status: data.status || 'processing',
+                message: data.message || 'Processing...',
+                currentStep: data.currentStep || 'unknown',
+                currentQuestion: data.currentQuestion,
+                questionIndex: data.questionIndex,
+                totalQuestions: data.totalQuestions,
+                chunkIndex: data.chunkIndex,
+                totalChunks: data.totalChunks,
+                score: data.score,
+                streamingText: streamingText
+              });
             }
-            
-            // Update progress state with live analysis generation updates
-            setProgress({
-              status: data.status || 'processing',
-              message: data.message || 'Processing...',
-              currentStep: data.currentStep || 'unknown',
-              currentQuestion: data.currentQuestion,
-              questionIndex: data.questionIndex,
-              totalQuestions: data.totalQuestions,
-              chunkIndex: data.chunkIndex,
-              totalChunks: data.totalChunks,
-              score: data.score,
-              streamingText: streamingText + (data.streamChunk || '')
-            });
             
             // If analysis is completed via progress, also set final score
             if (data.status === 'completed' && data.overallScore !== undefined) {
