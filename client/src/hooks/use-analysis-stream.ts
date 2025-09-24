@@ -2,10 +2,34 @@ import { useEffect, useState, useCallback } from 'react';
 import { AnalysisResult } from '@shared/schema';
 
 interface StreamEvent {
-  type: 'connected' | 'update' | 'complete' | 'error';
+  type: 'connected' | 'update' | 'complete' | 'error' | 'progress';
   analysisId?: string;
   analysis?: any;
   error?: string;
+  // Progress-specific fields
+  status?: string;
+  message?: string;
+  currentStep?: string;
+  currentQuestion?: string;
+  questionIndex?: number;
+  totalQuestions?: number;
+  chunkIndex?: number;
+  totalChunks?: number;
+  score?: number;
+  overallScore?: number;
+  processingTime?: number;
+}
+
+interface ProgressState {
+  status: string;
+  message: string;
+  currentStep: string;
+  currentQuestion?: string;
+  questionIndex?: number;
+  totalQuestions?: number;
+  chunkIndex?: number;
+  totalChunks?: number;
+  score?: number;
 }
 
 export function useAnalysisStream(analysisId: string | null) {
@@ -14,6 +38,7 @@ export function useAnalysisStream(analysisId: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [progress, setProgress] = useState<ProgressState | null>(null);
   const maxReconnectAttempts = 5;
 
   const connectToStream = useCallback(() => {
@@ -36,6 +61,27 @@ export function useAnalysisStream(analysisId: string | null) {
           case 'connected':
             setIsConnected(true);
             setReconnectAttempts(0);
+            break;
+          
+          case 'progress':
+            // Update progress state with live analysis generation updates
+            setProgress({
+              status: data.status || 'processing',
+              message: data.message || 'Processing...',
+              currentStep: data.currentStep || 'unknown',
+              currentQuestion: data.currentQuestion,
+              questionIndex: data.questionIndex,
+              totalQuestions: data.totalQuestions,
+              chunkIndex: data.chunkIndex,
+              totalChunks: data.totalChunks,
+              score: data.score
+            });
+            
+            // If analysis is completed via progress, also set final score
+            if (data.status === 'completed' && data.overallScore !== undefined) {
+              setIsComplete(true);
+              setIsConnected(false);
+            }
             break;
           
           case 'update':
@@ -124,6 +170,7 @@ export function useAnalysisStream(analysisId: string | null) {
     setIsComplete(false);
     setIsConnected(false);
     setReconnectAttempts(0);
+    setProgress(null);
   }, [analysisId]);
 
   // Fallback: Check analysis status via polling if streaming fails
@@ -174,6 +221,7 @@ export function useAnalysisStream(analysisId: string | null) {
     analysis,
     isConnected,
     error,
-    isComplete
+    isComplete,
+    progress
   };
 }

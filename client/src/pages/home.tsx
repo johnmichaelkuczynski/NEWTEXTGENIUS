@@ -35,7 +35,7 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Use streaming hook for real-time updates
-  const { analysis, isConnected, error: streamError, isComplete } = useAnalysisStream(analysisId);
+  const { analysis, isConnected, error: streamError, isComplete, progress } = useAnalysisStream(analysisId);
 
   // Handle stream completion
   useEffect(() => {
@@ -241,10 +241,10 @@ export default function Home() {
         {/* Progress Tracker */}
         <ProgressTracker
           isVisible={isAnalyzing}
-          currentStep={1}
-          totalSteps={4}
-          currentPhase="Processing Document - Analyzing text..."
-          currentAction="Evaluating originality questions..."
+          currentStep={progress?.questionIndex || 1}
+          totalSteps={progress?.totalQuestions || 4}
+          currentPhase={progress?.message || "Processing Document - Analyzing text..."}
+          currentAction={progress?.currentQuestion || "Evaluating originality questions..."}
           showPhaseDetails={config.analysisMode === 'comprehensive'}
           onCancel={() => setIsAnalyzing(false)}
         />
