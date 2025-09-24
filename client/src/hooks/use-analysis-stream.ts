@@ -93,9 +93,9 @@ export function useAnalysisStream(analysisId: string | null) {
                   id: data.analysis.id,
                   overallScore: data.analysis.overallScore,
                   processingTime: data.analysis.processingTime || 0,
-                  results: data.analysis.results?.results || [],
-                  document2Results: data.analysis.results?.document2Results,
-                  comparisonResults: data.analysis.results?.comparisonResults,
+                  results: data.analysis.results || [],
+                  document2Results: data.analysis.document2Results,
+                  comparisonResults: data.analysis.comparisonResults,
                 };
                 setAnalysis(transformedAnalysis);
               }

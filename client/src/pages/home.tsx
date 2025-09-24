@@ -240,11 +240,11 @@ export default function Home() {
 
         {/* Progress Tracker */}
         <ProgressTracker
-          isVisible={isAnalyzing}
+          isVisible={isAnalyzing || !!progress}
           currentStep={progress?.questionIndex || 1}
           totalSteps={progress?.totalQuestions || 4}
-          currentPhase={progress?.message || "Processing Document - Analyzing text..."}
-          currentAction={progress?.currentQuestion || "Evaluating originality questions..."}
+          currentPhase={progress?.currentQuestion ? `Analyzing: ${progress.currentQuestion}` : progress?.message || "Processing Document - Analyzing text..."}
+          currentAction={progress?.chunkIndex && progress?.totalChunks ? `Processing chunk ${progress.chunkIndex}/${progress.totalChunks}` : "Evaluating cognitive protocol..."}
           showPhaseDetails={config.analysisMode === 'comprehensive'}
           onCancel={() => setIsAnalyzing(false)}
         />

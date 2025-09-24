@@ -363,7 +363,8 @@ async function processDocument(
   questions: string[],
   provider: string,
   llmClient: LLMClients,
-  selectedChunks?: number[]
+  selectedChunks?: number[],
+  analysisId?: string
 ) {
   const allChunks = TextProcessor.chunkText(text);
   
