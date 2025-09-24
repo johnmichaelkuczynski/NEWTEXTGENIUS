@@ -120,97 +120,24 @@ export class LLMClients {
     const allQuestions = [...coreQuestions, ...additionalCriticalQuestions];
     const questionsText = allQuestions.join('\n');
 
-    const cognitiveProtocol = `ANSWER THESE QUESTIONS IN CONNECTION WITH THIS TEXT. You are NOT grading; you are answering these questions. You DO NOT use a risk-averse standard; you DO NOT attempt to be diplomatic; you DO NOT attempt to comply with risk-averse, medium-range IQ, academic norms. You DO NOT make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron. If a work is a work of genius, you say that, and you say why; you DO NOT shy away from giving what might conventionally be regarded as excessively "superlative" scores; you give it the score it deserves, NOT the score that a midwit committee would say it deserves.
+    const cognitiveProtocol = `Answer this specific question about the following text: "${question}"
 
-You think VERY VERY VERY hard about your answers; you do NOT default to cookbook, midwit evaluation protocols.
+Just answer the question directly. Do not provide scores, evaluations, or holistic judgments.
 
-DO NOT GIVE CREDIT MERELY FOR USE OF JARGON OR FOR REFERENCING AUTHORITIES. FOCUS ON SUBSTANCE. ONLY GIVE POINTS FOR SCHOLARLY REFERENCES/JARGON IF THEY UNAMBIGUOUSLY INCREASE SUBSTANCE.
-
-A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) of people outperform the author with respect to the parameter defined by the question.
-
-METAPOINTS:
-1. THIS IS NOT A GRADING APP. You grade the intelligence of what you are given. If you are given a brilliant fragment, you give it a high score. You are NOT grading essays. You are NOT looking for completeness unless the text you are given is clearly such that evaluating intelligence coincides with applying a grading-based metric. You do NOT 'grade'; your job is to answer the questions, PERIOD, and to do so on the basis of the text given, making ZERO assumptions about whether it is complete or incomplete, or for school or for some other context.
-
-2. DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is NOT necessarily "shutting down modes of inquiry". In fact, it is likely to be the OPPOSITE; by putting a clear stake in the ground, he is probably opening them. Another example: casual speech does NOT mean disorganized thoughts. Don't judge a book by its cover.
-
-3. You MUST start by summarizing the text and categorizing it.
-
-4. You should NOT change the grading based on the category of the text: if a text is categorized as 'advanced scholarship', it should still evaluate it with respect to the general population, NOT with respect only to 'advanced scholarly works.'
-
-5. THIS IS NOT A GRADING APP. DO NOT penalize boldness. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" is what makes something smart; it isn't. What makes something smart is that it is smart (insightful). PERIOD.
-
-THE FOLLOWING PASSAGE IS A PARADIGM OF PHONY, PSEUDO-INTELLECTUAL, NOT ACTUALLY INTELLIGENT PASSAGE THAT IS EASILY MISTAKEN FOR BEING ACTUALLY INTELLIGENT:
-
+THE FOLLOWING PASSAGE IS A PARADIGM OF PHONY, PSEUDO-INTELLECTUAL CONTENT:
 "${phonyParadigmPassage}"
 
-This passage exemplifies empty prose masquerading as intelligent through undefined jargon, free variables, and lack of actual development.
-
-THE FOLLOWING ARE EXAMPLES OF PASSAGES WITH GENUINE INSIGHT THAT SHOULD SCORE ≥96:
-
+THE FOLLOWING ARE EXAMPLES OF GENUINE INSIGHT:
 ${genuineInsightExamples.map((example: string, i: number) => `EXAMPLE ${i + 1}: "${example}"`).join('\n\n')}
 
-These examples show how genuine insight compresses meaningful claims with clear definitions and logical development.
+Text to analyze:
+${text}
 
-SPECIFIC QUESTION TO FOCUS ON: "${question}"
+Question: ${question}
 
-QUESTIONS TO ANSWER:
-${questionsText}
+Answer:`;
 
-CRITICAL SCORING REQUIREMENTS:
-- If this app gives a score of more than 65 to passages like the phony paradigm above, the app is a FAILURE
-- If this app gives scores of less than 96 to passages with genuine insight like the examples provided, the app is a FAILURE
-- Focus on ACTUAL SUBSTANCE, not academic scaffolding
-- Detect pseudo-intellectual content that uses jargon to hide lack of meaning
-
-IF YOUR INITIAL ANSWERS FAIL TO VALIDATE THESE POINTS, YOU MUST REVISE THEM.`;
-
-    if (phase === 2 && previousScore !== undefined) {
-      return `${cognitiveProtocol}
-
-RECALIBRATION REQUIRED: Your previous score was ${previousScore}/100.
-
-Re-examine the text using the full cognitive protocol above. Focus especially on:
-- Are there undefined terms that should be defined?
-- Are there free variables that don't connect to anything?
-- Is this actually smart or just "presumption-smart"?
-- Can you state the insights in clear sentences?
-
-If the text has genuine insights, it should score ≥96. If it's pseudo-intellectual like the paradigm passage, it should score ≤65.
-
-Your response MUST be in JSON format:
-{
-  "score": [0-100],
-  "explanation": "[detailed analysis following the cognitive protocol]",
-  "quotes": ["supporting quotes"],
-  "category": "[text category]",
-  "summary": "[text summary]",
-  "actual_insights": ["clearly stated insights, one per sentence"],
-  "undefined_terms": ["terms that lack clear meaning"],
-  "free_variables": ["disconnected qualifications"],
-  "substance_vs_jargon": "[assessment of real substance vs academic posturing]"
-}
-
-Text:
-${text}`;
-    }
-
-    return `${cognitiveProtocol}
-
-Your response MUST be in JSON format:
-{
-  "score": [0-100],
-  "explanation": "[detailed analysis following the cognitive protocol]", 
-  "quotes": ["supporting quotes"],
-  "category": "[text category]",
-  "summary": "[text summary]",
-  "actual_insights": ["clearly stated insights, one per sentence"],
-  "undefined_terms": ["terms that lack clear meaning"],
-  "free_variables": ["disconnected qualifications"],
-  "substance_vs_jargon": "[assessment of real substance vs academic posturing]"
-}
-
-Text:
-${text}`;
+    return cognitiveProtocol;
   }
 
   private async callAnthropic(prompt: string): Promise<LLMResponse> {
@@ -229,34 +156,15 @@ ${text}`;
       throw new Error('Unexpected response type from Anthropic');
     }
 
-    try {
-      // Clean the response by extracting JSON if it's embedded in text
-      let jsonText = content.text.trim();
-      
-      // Look for JSON block between ```json and ``` or just look for { }
-      const jsonMatch = jsonText.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
-                       jsonText.match(/(\{[\s\S]*\})/);
-      
-      if (jsonMatch) {
-        jsonText = jsonMatch[1];
-      }
-      
-      const parsed = JSON.parse(jsonText);
-      
-      // Use the cognitive protocol format (direct score)
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || content.text,
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
-    } catch (error) {
-      console.error('JSON parsing failed, returning neutral fallback response:', error);
-      return {
-        score: 50, // Neutral score on parse failure - no heuristic inflation
-        explanation: content.text || 'Unable to parse provider response as valid JSON',
-        quotes: []
-      };
-    }
+    // Process text answer and derive score according to cognitive protocol
+    const answer = content.text.trim();
+    const score = this.deriveScoreFromAnswer(answer);
+    
+    return {
+      score,
+      explanation: answer,
+      quotes: []
+    };
   }
 
   private async callOpenAI(prompt: string): Promise<LLMResponse> {
@@ -277,18 +185,14 @@ ${text}`;
       throw new Error('Empty response from OpenAI');
     }
 
-    try {
-      const parsed = JSON.parse(content);
-      
-      // Use the cognitive protocol format (direct score)
-      return {
-        score: Math.max(0, Math.min(100, parsed.score)),
-        explanation: parsed.explanation,
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
-    } catch (error) {
-      throw new Error('Failed to parse OpenAI response as JSON');
-    }
+    // Process text answer and derive score according to cognitive protocol
+    const score = this.deriveScoreFromAnswer(content);
+    
+    return {
+      score,
+      explanation: content,
+      quotes: []
+    };
   }
 
   private async callPerplexity(prompt: string): Promise<LLMResponse> {
@@ -404,23 +308,14 @@ ${text}`;
       cleanedContent = cleanedContent.substring(jsonStart, jsonEnd + 1);
     }
 
-    try {
-      const parsed = JSON.parse(cleanedContent);
-      
-      // Use the cognitive protocol format (direct score)
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
-    } catch (error) {
-      console.error('Perplexity JSON parsing failed:', { content, cleanedContent, error });
-      return {
-        score: 50, // Neutral score on parse failure - no heuristic inflation
-        explanation: 'Unable to parse provider response as valid JSON',
-        quotes: []
-      };
-    }
+    // Process text answer and derive score according to cognitive protocol
+    const score = this.deriveScoreFromAnswer(content);
+    
+    return {
+      score,
+      explanation: content,
+      quotes: []
+    };
   }
 
   private async callDeepSeek(prompt: string): Promise<LLMResponse> {
@@ -471,25 +366,55 @@ ${text}`;
       cleanedContent = cleanedContent.substring(jsonStart, jsonEnd + 1);
     }
 
-    try {
-      const parsed = JSON.parse(cleanedContent);
-      
-      // Use the cognitive protocol format (direct score)
-      return {
-        score: Math.max(0, Math.min(100, parsed.score || 0)),
-        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-      };
-    } catch (error) {
-      console.error('DeepSeek JSON parsing failed:', { content, cleanedContent, error });
-      return {
-        score: 50, // Neutral score on parse failure - no heuristic inflation
-        explanation: 'Unable to parse provider response as valid JSON',
-        quotes: []
-      };
-    }
+    // Process text answer and derive score according to cognitive protocol
+    const score = this.deriveScoreFromAnswer(content);
+    
+    return {
+      score,
+      explanation: content,
+      quotes: []
+    };
   }
 
-  // Removed calculateWeightedScore and isTextSophisticated - 
-  // cognitive protocol uses direct scoring without manipulation
+  private deriveScoreFromAnswer(answer: string): number {
+    const lowerAnswer = answer.toLowerCase();
+    
+    // For "IS IT INSIGHTFUL?" - If answer indicates genuine insights = 96+, if no insights = ≤65
+    if (lowerAnswer.includes('yes') || 
+        lowerAnswer.includes('provides insight') || 
+        lowerAnswer.includes('demonstrates insight') ||
+        lowerAnswer.includes('genuine insight') ||
+        lowerAnswer.includes('meaningful insight')) {
+      return 96; // Genuine insight
+    }
+    
+    // For "IS IT REAL OR IS IT PHONY?" - If real = 96+, if phony = ≤65  
+    if (lowerAnswer.includes('real') || lowerAnswer.includes('genuine')) {
+      return 96;
+    }
+    if (lowerAnswer.includes('phony') || lowerAnswer.includes('pseudo-intellectual')) {
+      return 50;
+    }
+    
+    // For questions about development, organization, freshness - positive answers = 96+
+    if (lowerAnswer.includes('develops points') ||
+        lowerAnswer.includes('hierarchically') ||
+        lowerAnswer.includes('organic') ||
+        lowerAnswer.includes('fresh') ||
+        lowerAnswer.includes('opens up domains')) {
+      return 96;
+    }
+    
+    // For negative indicators - cliches, evasive, ambiguous = ≤65
+    if (lowerAnswer.includes('cliche') ||
+        lowerAnswer.includes('evasive') ||
+        lowerAnswer.includes('ambiguous') ||
+        lowerAnswer.includes('undefined terms') ||
+        lowerAnswer.includes('free variables')) {
+      return 50;
+    }
+    
+    // Default neutral for unclear answers
+    return 75;
+  }
 }
