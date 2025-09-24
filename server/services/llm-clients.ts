@@ -203,6 +203,7 @@ Answer:`;
       throw new Error('Anthropic API key not configured on server');
     }
 
+    
     const stream = await this.anthropic.messages.create({
       model: DEFAULT_ANTHROPIC_MODEL, // "claude-sonnet-4-20250514"
       max_tokens: 2000,

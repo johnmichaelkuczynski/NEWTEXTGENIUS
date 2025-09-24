@@ -93,8 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create analysis record
       const analysis = await storage.createAnalysis(validatedRequest);
 
-      // Start background processing
-      processAnalysisAsync(analysis.id, validatedRequest);
+      // Start background processing with a small delay to allow SSE connection
+      setTimeout(() => {
+        processAnalysisAsync(analysis.id, validatedRequest);
+      }, 1000);
 
       res.json({ 
         analysisId: analysis.id,
