@@ -18,6 +18,8 @@ interface StreamEvent {
   score?: number;
   overallScore?: number;
   processingTime?: number;
+  // Streaming text fields
+  streamChunk?: string;
 }
 
 interface ProgressState {
@@ -30,6 +32,7 @@ interface ProgressState {
   chunkIndex?: number;
   totalChunks?: number;
   score?: number;
+  streamingText?: string;
 }
 
 export function useAnalysisStream(analysisId: string | null) {
@@ -39,6 +42,7 @@ export function useAnalysisStream(analysisId: string | null) {
   const [isComplete, setIsComplete] = useState(false);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
   const [progress, setProgress] = useState<ProgressState | null>(null);
+  const [streamingText, setStreamingText] = useState<string>('');
   const maxReconnectAttempts = 5;
 
   const connectToStream = useCallback(() => {
@@ -64,6 +68,14 @@ export function useAnalysisStream(analysisId: string | null) {
             break;
           
           case 'progress':
+            // Handle streaming text updates
+            if (data.streamChunk && data.status === 'streaming') {
+              setStreamingText(prev => prev + data.streamChunk);
+            } else if (data.status === 'processing_question') {
+              // New question started, clear streaming text
+              setStreamingText('');
+            }
+            
             // Update progress state with live analysis generation updates
             setProgress({
               status: data.status || 'processing',
@@ -74,7 +86,8 @@ export function useAnalysisStream(analysisId: string | null) {
               totalQuestions: data.totalQuestions,
               chunkIndex: data.chunkIndex,
               totalChunks: data.totalChunks,
-              score: data.score
+              score: data.score,
+              streamingText: streamingText + (data.streamChunk || '')
             });
             
             // If analysis is completed via progress, also set final score
@@ -171,6 +184,7 @@ export function useAnalysisStream(analysisId: string | null) {
     setIsConnected(false);
     setReconnectAttempts(0);
     setProgress(null);
+    setStreamingText('');
   }, [analysisId]);
 
   // Fallback: Check analysis status via polling if streaming fails
@@ -222,6 +236,7 @@ export function useAnalysisStream(analysisId: string | null) {
     isConnected,
     error,
     isComplete,
-    progress
+    progress,
+    streamingText
   };
 }

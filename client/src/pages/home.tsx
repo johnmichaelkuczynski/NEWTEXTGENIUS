@@ -35,7 +35,7 @@ export default function Home() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Use streaming hook for real-time updates
-  const { analysis, isConnected, error: streamError, isComplete, progress } = useAnalysisStream(analysisId);
+  const { analysis, isConnected, error: streamError, isComplete, progress, streamingText } = useAnalysisStream(analysisId);
 
   // Handle stream completion
   useEffect(() => {
@@ -247,6 +247,7 @@ export default function Home() {
           currentAction={progress?.chunkIndex && progress?.totalChunks ? `Processing chunk ${progress.chunkIndex}/${progress.totalChunks}` : "Evaluating cognitive protocol..."}
           showPhaseDetails={config.analysisMode === 'comprehensive'}
           onCancel={() => setIsAnalyzing(false)}
+          streamingText={streamingText}
         />
 
         {/* Results Display */}

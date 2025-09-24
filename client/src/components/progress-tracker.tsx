@@ -12,6 +12,7 @@ interface ProgressTrackerProps {
   currentAction: string;
   showPhaseDetails?: boolean;
   onCancel: () => void;
+  streamingText?: string;
 }
 
 export function ProgressTracker({
@@ -21,7 +22,8 @@ export function ProgressTracker({
   currentPhase,
   currentAction,
   showPhaseDetails = false,
-  onCancel
+  onCancel,
+  streamingText
 }: ProgressTrackerProps) {
   if (!isVisible) return null;
 
@@ -65,12 +67,23 @@ export function ProgressTracker({
         <div className="bg-gray-50 rounded-lg p-4 mb-4">
           <div className="flex items-center">
             <Loader2 className="animate-spin h-5 w-5 text-primary-600 mr-3" />
-            <div>
+            <div className="flex-1">
               <p className="font-medium text-gray-900" data-testid="current-phase">{currentPhase}</p>
               <p className="text-sm text-gray-600" data-testid="current-action">{currentAction}</p>
             </div>
           </div>
         </div>
+
+        {/* Streaming Text Generation */}
+        {streamingText && (
+          <div className="bg-white border rounded-lg p-4 mb-4" data-testid="streaming-text">
+            <h4 className="font-medium text-gray-900 mb-2">Live Analysis Generation:</h4>
+            <div className="bg-gray-50 rounded p-3 font-mono text-sm text-gray-800 max-h-48 overflow-y-auto">
+              {streamingText}
+              <span className="animate-pulse text-primary-600">▊</span>
+            </div>
+          </div>
+        )}
 
         {/* Phase Details (Comprehensive Mode) */}
         {showPhaseDetails && (

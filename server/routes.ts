@@ -415,7 +415,23 @@ async function processDocument(
       }
       
       try {
-        const result = await llmClient.analyzeText(provider, chunk.text, question);
+        const result = await llmClient.analyzeTextStream(provider, chunk.text, question, (streamChunk: string) => {
+          // Send streaming text to the frontend
+          if (analysisId) {
+            sendProgressUpdate(analysisId, {
+              type: 'streaming_text',
+              status: 'streaming',
+              message: `Question ${questionIndex + 1}/${questions.length}: Processing chunk ${i + 1}/${chunksToProcess.length}`,
+              currentStep: 'streaming_response',
+              currentQuestion: question,
+              questionIndex: questionIndex + 1,
+              totalQuestions: questions.length,
+              chunkIndex: i + 1,
+              totalChunks: chunksToProcess.length,
+              streamChunk: streamChunk
+            });
+          }
+        });
         chunkResults.push({
           chunkIndex: chunk.index, // Use original chunk index
           ...result
