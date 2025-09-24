@@ -73,143 +73,104 @@ export class LLMClients {
         throw new Error(`Unsupported LLM provider: ${provider}`);
     }
 
-    // Apply scoring calibration enforcement for sophisticated texts
-    const isSophisticated = text.length > 500 && 
-                           (text.toLowerCase().includes('argument') ||
-                            text.toLowerCase().includes('philosophy') ||
-                            text.toLowerCase().includes('analysis') ||
-                            text.toLowerCase().includes('theory'));
-    
-    if (phase === 1 && result.score < 90 && isSophisticated) {
-      // For sophisticated philosophical texts, scores should be 90+ unless specific flaws exist
-      const hasSpecificFlaws = result.explanation.toLowerCase().includes('flaw') ||
-                              result.explanation.toLowerCase().includes('error') ||
-                              result.explanation.toLowerCase().includes('contradiction') ||
-                              result.explanation.toLowerCase().includes('incoherent');
-      
-      if (!hasSpecificFlaws) {
-        // Recalibrate with a second pass
-        console.log(`Recalibrating low score (${result.score}) for sophisticated text`);
-        const recalibratedResult = await this.analyzeText(provider, text, question, 2, result.score);
-        
-        // Final enforcement: If still no specific flaws after recalibration, enforce floor
-        if (recalibratedResult.score < 90) {
-          const stillNoFlaws = !recalibratedResult.explanation.toLowerCase().includes('flaw') &&
-                               !recalibratedResult.explanation.toLowerCase().includes('error') &&
-                               !recalibratedResult.explanation.toLowerCase().includes('contradiction');
-          if (stillNoFlaws) {
-            console.log(`Enforcing scoring floor: ${recalibratedResult.score} -> 92`);
-            recalibratedResult.score = Math.max(recalibratedResult.score, 92);
-          }
-        }
-        return recalibratedResult;
-      }
-    }
+    // Trust the cognitive protocol completely - no score manipulation
 
     return result;
   }
 
   private buildAnalysisPrompt(text: string, question: string, phase: number = 1, previousScore?: number): string {
-    const coreInstruction = `EVALUATE INTELLECTUAL SUBSTANCE ONLY:
-Ignore academic format, tone, politeness, citations, and formal structure.
-Reward genuine insight even if rough; penalize bureaucratic conformity even if polished.
+    // Import questions from our protocol
+    const { coreQuestions, additionalCriticalQuestions, phonyParadigmPassage, genuineInsightExamples } = require('./question-sets');
+    const allQuestions = [...coreQuestions, ...additionalCriticalQuestions];
+    const questionsText = allQuestions.join('\n');
 
-SCORING PRINCIPLE:
-- Insight trumps convention
-- Original thinking > academic politeness  
-- Substance > form
-- Breakthrough ideas > safe consensus
+    const cognitiveProtocol = `ANSWER THESE QUESTIONS IN CONNECTION WITH THIS TEXT. You are NOT grading; you are answering these questions. You DO NOT use a risk-averse standard; you DO NOT attempt to be diplomatic; you DO NOT attempt to comply with risk-averse, medium-range IQ, academic norms. You DO NOT make assumptions about the level of the paper; it could be a work of the highest excellence and genius, or it could be the work of a moron. If a work is a work of genius, you say that, and you say why; you DO NOT shy away from giving what might conventionally be regarded as excessively "superlative" scores; you give it the score it deserves, NOT the score that a midwit committee would say it deserves.
 
-Score based on:
-- Insight (40%): Novel distinctions, reframing, cross-domain synthesis
-- Generativity (25%): Opens design space, produces testable predictions
-- Mechanism (15%): Proposes causal models, increases explanatory power
-- Coherence (10%): Internal consistency, traceable claim structure
-- Epistemic Posture (10%): Direct claims, minimal hedge-vacuity, low appeal to authority`;
+You think VERY VERY VERY hard about your answers; you do NOT default to cookbook, midwit evaluation protocols.
+
+DO NOT GIVE CREDIT MERELY FOR USE OF JARGON OR FOR REFERENCING AUTHORITIES. FOCUS ON SUBSTANCE. ONLY GIVE POINTS FOR SCHOLARLY REFERENCES/JARGON IF THEY UNAMBIGUOUSLY INCREASE SUBSTANCE.
+
+A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) of people outperform the author with respect to the parameter defined by the question.
+
+METAPOINTS:
+1. THIS IS NOT A GRADING APP. You grade the intelligence of what you are given. If you are given a brilliant fragment, you give it a high score. You are NOT grading essays. You are NOT looking for completeness unless the text you are given is clearly such that evaluating intelligence coincides with applying a grading-based metric. You do NOT 'grade'; your job is to answer the questions, PERIOD, and to do so on the basis of the text given, making ZERO assumptions about whether it is complete or incomplete, or for school or for some other context.
+
+2. DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is NOT necessarily "shutting down modes of inquiry". In fact, it is likely to be the OPPOSITE; by putting a clear stake in the ground, he is probably opening them. Another example: casual speech does NOT mean disorganized thoughts. Don't judge a book by its cover.
+
+3. You MUST start by summarizing the text and categorizing it.
+
+4. You should NOT change the grading based on the category of the text: if a text is categorized as 'advanced scholarship', it should still evaluate it with respect to the general population, NOT with respect only to 'advanced scholarly works.'
+
+5. THIS IS NOT A GRADING APP. DO NOT penalize boldness. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" is what makes something smart; it isn't. What makes something smart is that it is smart (insightful). PERIOD.
+
+THE FOLLOWING PASSAGE IS A PARADIGM OF PHONY, PSEUDO-INTELLECTUAL, NOT ACTUALLY INTELLIGENT PASSAGE THAT IS EASILY MISTAKEN FOR BEING ACTUALLY INTELLIGENT:
+
+"${phonyParadigmPassage}"
+
+This passage exemplifies empty prose masquerading as intelligent through undefined jargon, free variables, and lack of actual development.
+
+THE FOLLOWING ARE EXAMPLES OF PASSAGES WITH GENUINE INSIGHT THAT SHOULD SCORE ≥96:
+
+${genuineInsightExamples.map((example: string, i: number) => `EXAMPLE ${i + 1}: "${example}"`).join('\n\n')}
+
+These examples show how genuine insight compresses meaningful claims with clear definitions and logical development.
+
+SPECIFIC QUESTION TO FOCUS ON: "${question}"
+
+QUESTIONS TO ANSWER:
+${questionsText}
+
+CRITICAL SCORING REQUIREMENTS:
+- If this app gives a score of more than 65 to passages like the phony paradigm above, the app is a FAILURE
+- If this app gives scores of less than 96 to passages with genuine insight like the examples provided, the app is a FAILURE
+- Focus on ACTUAL SUBSTANCE, not academic scaffolding
+- Detect pseudo-intellectual content that uses jargon to hide lack of meaning
+
+IF YOUR INITIAL ANSWERS FAIL TO VALIDATE THESE POINTS, YOU MUST REVISE THEM.`;
 
     if (phase === 2 && previousScore !== undefined) {
-      return `${coreInstruction}
+      return `${cognitiveProtocol}
 
-RECALIBRATION: Your previous score was ${previousScore}/100.
+RECALIBRATION REQUIRED: Your previous score was ${previousScore}/100.
 
-Focus on intellectual substance:
-- Does the text make novel distinctions or propose new mechanisms?
-- Does it generate testable predictions or open new questions?
-- Are there genuine insights regardless of presentation style?
-- If yes to any above, score should be ≥90 regardless of tone/format
-- Only penalize if derivative/bureaucratic (appeals to consensus, hedge-dense, authority-as-proof)
+Re-examine the text using the full cognitive protocol above. Focus especially on:
+- Are there undefined terms that should be defined?
+- Are there free variables that don't connect to anything?
+- Is this actually smart or just "presumption-smart"?
+- Can you state the insights in clear sentences?
 
-Question: "${question}"
+If the text has genuine insights, it should score ≥96. If it's pseudo-intellectual like the paradigm passage, it should score ≤65.
 
-Use two-pass evaluation:
-Pass 1 - Extract core substance (ignore tone/format):
-- Core claims and novel distinctions
-- Mechanisms or causal models proposed  
-- Testable predictions or new questions opened
-- Cross-domain connections made
-- Bureaucratic flags (consensus appeals, hedge-vacuity, authority-as-proof)
-
-Pass 2 - Score on substance only:
-JSON format required:
+Your response MUST be in JSON format:
 {
-  "core_claims": ["key claims made"],
-  "novel_moves": ["novel distinctions/reframing"],
-  "mechanisms": ["causal models proposed"],
-  "predictions": ["testable predictions/new questions"],
-  "bureaucracy_flags": ["appeals to consensus/authority, hedge-vacuity"],
-  "insight_score": [0-100],
-  "generativity_score": [0-100], 
-  "mechanism_score": [0-100],
-  "coherence_score": [0-100],
-  "posture_score": [0-100],
-  "final_score": [0-100],
-  "explanation": "[focus on substance, not presentation]",
-  "quotes": ["supporting quotes"]
+  "score": [0-100],
+  "explanation": "[detailed analysis following the cognitive protocol]",
+  "quotes": ["supporting quotes"],
+  "category": "[text category]",
+  "summary": "[text summary]",
+  "actual_insights": ["clearly stated insights, one per sentence"],
+  "undefined_terms": ["terms that lack clear meaning"],
+  "free_variables": ["disconnected qualifications"],
+  "substance_vs_jargon": "[assessment of real substance vs academic posturing]"
 }
 
 Text:
 ${text}`;
     }
 
-    return `${coreInstruction}
+    return `${cognitiveProtocol}
 
-Question: "${question}"
-
-Use two-pass evaluation:
-
-Pass 1 - Extract core substance (ignore tone, format, politeness):
-- What novel distinctions or reframing does this offer?
-- What mechanisms or causal models are proposed?
-- What testable predictions or new questions emerge?
-- What cross-domain connections are made?
-- Any bureaucratic flags (consensus appeals, hedge-vacuity, authority-as-proof)?
-
-Pass 2 - Score dimensions based on substance only:
-- Insight (40%): Quality of novel distinctions and reframing
-- Generativity (25%): Opens new questions, design space, predictions  
-- Mechanism (15%): Causal models, explanatory leverage
-- Coherence (10%): Internal consistency, traceable claims
-- Posture (10%): Direct claims, minimal hedging, low authority appeals
-
-Final score = weighted average, with floors/caps:
-- If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90 regardless of tone
-- If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75 even if polished
-
-JSON format required:
+Your response MUST be in JSON format:
 {
-  "core_claims": ["key claims made"],
-  "novel_moves": ["novel distinctions/reframing"], 
-  "mechanisms": ["causal models proposed"],
-  "predictions": ["testable predictions/new questions"],
-  "bureaucracy_flags": ["appeals to consensus/authority, hedge-vacuity"],
-  "insight_score": [0-100],
-  "generativity_score": [0-100],
-  "mechanism_score": [0-100], 
-  "coherence_score": [0-100],
-  "posture_score": [0-100],
-  "final_score": [0-100],
-  "explanation": "[analyze substance, ignore presentation style]",
-  "quotes": ["supporting quotes"]
+  "score": [0-100],
+  "explanation": "[detailed analysis following the cognitive protocol]", 
+  "quotes": ["supporting quotes"],
+  "category": "[text category]",
+  "summary": "[text summary]",
+  "actual_insights": ["clearly stated insights, one per sentence"],
+  "undefined_terms": ["terms that lack clear meaning"],
+  "free_variables": ["disconnected qualifications"],
+  "substance_vs_jargon": "[assessment of real substance vs academic posturing]"
 }
 
 Text:
@@ -246,29 +207,17 @@ ${text}`;
       
       const parsed = JSON.parse(jsonText);
       
-      // Handle new format with dimensional scoring
-      if (parsed.final_score !== undefined) {
-        const score = this.calculateWeightedScore(parsed);
-        return {
-          score: Math.max(0, Math.min(100, score)),
-          explanation: parsed.explanation || content.text,
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      } else {
-        // Fallback for old format
-        return {
-          score: Math.max(0, Math.min(100, parsed.score || 0)),
-          explanation: parsed.explanation || content.text,
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      }
-    } catch (error) {
-      console.error('JSON parsing failed, returning fallback response:', error);
-      // Fallback with appropriate score for sophisticated texts (detect from input)
-      const inputIsSophisticated = this.isTextSophisticated(prompt);
+      // Use the cognitive protocol format (direct score)
       return {
-        score: inputIsSophisticated ? 92 : 80, // Higher fallback for sophisticated content
-        explanation: content.text || 'Unable to parse response properly',
+        score: Math.max(0, Math.min(100, parsed.score || 0)),
+        explanation: parsed.explanation || content.text,
+        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+      };
+    } catch (error) {
+      console.error('JSON parsing failed, returning neutral fallback response:', error);
+      return {
+        score: 50, // Neutral score on parse failure - no heuristic inflation
+        explanation: content.text || 'Unable to parse provider response as valid JSON',
         quotes: []
       };
     }
@@ -295,22 +244,12 @@ ${text}`;
     try {
       const parsed = JSON.parse(content);
       
-      // Handle new format with dimensional scoring
-      if (parsed.final_score !== undefined) {
-        const score = this.calculateWeightedScore(parsed);
-        return {
-          score: Math.max(0, Math.min(100, score)),
-          explanation: parsed.explanation,
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      } else {
-        // Fallback for old format
-        return {
-          score: Math.max(0, Math.min(100, parsed.score)),
-          explanation: parsed.explanation,
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      }
+      // Use the cognitive protocol format (direct score)
+      return {
+        score: Math.max(0, Math.min(100, parsed.score)),
+        explanation: parsed.explanation,
+        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+      };
     } catch (error) {
       throw new Error('Failed to parse OpenAI response as JSON');
     }
@@ -396,26 +335,16 @@ ${text}`;
         try {
           const parsed = JSON.parse(cleanedContent);
           
-          // Handle new format with dimensional scoring  
-          if (parsed.final_score !== undefined) {
-            const score = this.calculateWeightedScore(parsed);
-            return {
-              score: Math.max(0, Math.min(100, score)),
-              explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-              quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-            };
-          } else {
-            // Fallback for old format
-            return {
-              score: Math.max(0, Math.min(100, parsed.score || 0)),
-              explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-              quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-            };
-          }
+          // Use the cognitive protocol format (direct score)
+          return {
+            score: Math.max(0, Math.min(100, parsed.score || 0)),
+            explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+            quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+          };
         } catch (error) {
           console.error('Perplexity JSON parsing failed on retry:', error);
           return {
-            score: 85, // Neutral fallback for retry failures
+            score: 50, // Neutral fallback for retry failures - no heuristic inflation
             explanation: 'Unable to generate explanation due to Perplexity model configuration issues.',
             quotes: []
           };
@@ -442,29 +371,17 @@ ${text}`;
     try {
       const parsed = JSON.parse(cleanedContent);
       
-      // Handle new format with dimensional scoring
-      if (parsed.final_score !== undefined) {
-        const score = this.calculateWeightedScore(parsed);
-        return {
-          score: Math.max(0, Math.min(100, score)),
-          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      } else {
-        // Fallback for old format
-        return {
-          score: Math.max(0, Math.min(100, parsed.score || 0)),
-          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      }
+      // Use the cognitive protocol format (direct score)
+      return {
+        score: Math.max(0, Math.min(100, parsed.score || 0)),
+        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+      };
     } catch (error) {
       console.error('Perplexity JSON parsing failed:', { content, cleanedContent, error });
-      // Fallback response with appropriate scoring (detect from input)
-      const inputIsSophisticated = this.isTextSophisticated(prompt);
       return {
-        score: inputIsSophisticated ? 92 : 75,
-        explanation: 'Unable to parse structured response, but text appears sophisticated.',
+        score: 50, // Neutral score on parse failure - no heuristic inflation
+        explanation: 'Unable to parse provider response as valid JSON',
         quotes: []
       };
     }
@@ -521,82 +438,22 @@ ${text}`;
     try {
       const parsed = JSON.parse(cleanedContent);
       
-      // Handle new format with dimensional scoring
-      if (parsed.final_score !== undefined) {
-        const score = this.calculateWeightedScore(parsed);
-        return {
-          score: Math.max(0, Math.min(100, score)),
-          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      } else {
-        // Fallback for old format
-        return {
-          score: Math.max(0, Math.min(100, parsed.score || 0)),
-          explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
-          quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
-        };
-      }
+      // Use the cognitive protocol format (direct score)
+      return {
+        score: Math.max(0, Math.min(100, parsed.score || 0)),
+        explanation: parsed.explanation || 'Unable to generate explanation due to processing errors.',
+        quotes: Array.isArray(parsed.quotes) ? parsed.quotes : []
+      };
     } catch (error) {
       console.error('DeepSeek JSON parsing failed:', { content, cleanedContent, error });
-      // Fallback response with appropriate scoring (detect from input)
-      const inputIsSophisticated = this.isTextSophisticated(prompt);
       return {
-        score: inputIsSophisticated ? 92 : 75,
-        explanation: 'Unable to parse structured response, but text appears sophisticated.',
+        score: 50, // Neutral score on parse failure - no heuristic inflation
+        explanation: 'Unable to parse provider response as valid JSON',
         quotes: []
       };
     }
   }
 
-  private calculateWeightedScore(parsed: any): number {
-    // Extract dimensional scores
-    const insight = parsed.insight_score || 0;
-    const generativity = parsed.generativity_score || 0; 
-    const mechanism = parsed.mechanism_score || 0;
-    const coherence = parsed.coherence_score || 0;
-    const posture = parsed.posture_score || 0;
-    
-    // Calculate weighted average: insight(40%) + generativity(25%) + mechanism(15%) + coherence(10%) + posture(10%)
-    let weightedScore = (insight * 0.4) + (generativity * 0.25) + (mechanism * 0.15) + (coherence * 0.1) + (posture * 0.1);
-    
-    // Apply floors and caps based on novel moves and bureaucracy flags
-    const novelMoves = Array.isArray(parsed.novel_moves) ? parsed.novel_moves.length : 0;
-    const bureaucracyFlags = Array.isArray(parsed.bureaucracy_flags) ? parsed.bureaucracy_flags.length : 0;
-    
-    // Floor: If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90
-    if (novelMoves >= 2 || (insight >= 85 && generativity >= 80)) {
-      weightedScore = Math.max(weightedScore, 90);
-    }
-    
-    // Cap: If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75
-    if (bureaucracyFlags >= 2 && novelMoves < 2) {
-      weightedScore = Math.min(weightedScore, 75);
-    }
-    
-    // Start with final_score if provided, otherwise use calculated weighted score
-    let baseScore = typeof parsed.final_score === 'number' ? parsed.final_score : weightedScore;
-    
-    // ALWAYS apply floors and caps regardless of source
-    // Floor: If ≥2 novel moves OR (insight≥85 AND generativity≥80): enforce ≥90
-    if (novelMoves >= 2 || (insight >= 85 && generativity >= 80)) {
-      baseScore = Math.max(baseScore, 90);
-    }
-    
-    // Cap: If ≥2 bureaucracy flags AND <2 novel moves: cap ≤75
-    if (bureaucracyFlags >= 2 && novelMoves < 2) {
-      baseScore = Math.min(baseScore, 75);
-    }
-    
-    return Math.max(0, Math.min(100, baseScore));
-  }
-  
-  private isTextSophisticated(text: string): boolean {
-    return Boolean(text && text.length > 500 && 
-           (text.toLowerCase().includes('argument') ||
-            text.toLowerCase().includes('analysis') ||
-            text.toLowerCase().includes('philosophy') ||
-            text.toLowerCase().includes('theory') ||
-            text.toLowerCase().includes('reasoning')));
-  }
+  // Removed calculateWeightedScore and isTextSophisticated - 
+  // cognitive protocol uses direct scoring without manipulation
 }
