@@ -73,6 +73,37 @@ export class LLMClients {
         throw new Error(`Unsupported LLM provider: ${provider}`);
     }
 
+    return result;
+  }
+
+  async analyzeTextStream(
+    provider: string,
+    text: string,
+    question: string,
+    onStream: (chunk: string) => void,
+    phase: number = 1,
+    previousScore?: number
+  ): Promise<LLMResponse> {
+    const prompt = this.buildAnalysisPrompt(text, question, phase, previousScore);
+    let result: LLMResponse;
+
+    switch (provider) {
+      case 'anthropic':
+        result = await this.callAnthropicStream(prompt, onStream);
+        break;
+      case 'openai':
+        result = await this.callOpenAIStream(prompt, onStream);
+        break;
+      case 'perplexity':
+        result = await this.callPerplexityStream(prompt, onStream);
+        break;
+      case 'deepseek':
+        result = await this.callDeepSeekStream(prompt, onStream);
+        break;
+      default:
+        throw new Error(`Unsupported LLM provider: ${provider}`);
+    }
+
     // Trust the cognitive protocol completely - no score manipulation
 
     return result;
@@ -167,6 +198,37 @@ Answer:`;
     };
   }
 
+  private async callAnthropicStream(prompt: string, onStream: (chunk: string) => void): Promise<LLMResponse> {
+    if (!this.anthropic) {
+      throw new Error('Anthropic API key not configured on server');
+    }
+
+    const stream = await this.anthropic.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL, // "claude-sonnet-4-20250514"
+      max_tokens: 2000,
+      messages: [{ role: 'user', content: prompt }],
+      stream: true,
+    });
+
+    let fullText = '';
+    for await (const chunk of stream) {
+      if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+        const text = chunk.delta.text;
+        fullText += text;
+        onStream(text);
+      }
+    }
+
+    // Process text answer and derive score according to cognitive protocol
+    const score = this.deriveScoreFromAnswer(fullText);
+    
+    return {
+      score,
+      explanation: fullText.trim(),
+      quotes: []
+    };
+  }
+
   private async callOpenAI(prompt: string): Promise<LLMResponse> {
     if (!this.openai) {
       throw new Error('OpenAI API key not configured on server');
@@ -191,6 +253,37 @@ Answer:`;
     return {
       score,
       explanation: content,
+      quotes: []
+    };
+  }
+
+  private async callOpenAIStream(prompt: string, onStream: (chunk: string) => void): Promise<LLMResponse> {
+    if (!this.openai) {
+      throw new Error('OpenAI API key not configured on server');
+    }
+
+    // For streaming, we can't use JSON format, so we'll get plain text response
+    const stream = await this.openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [{ role: 'user', content: prompt }],
+      stream: true,
+    });
+
+    let fullText = '';
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        fullText += content;
+        onStream(content);
+      }
+    }
+
+    // Process text answer and derive score according to cognitive protocol
+    const score = this.deriveScoreFromAnswer(fullText);
+    
+    return {
+      score,
+      explanation: fullText.trim(),
       quotes: []
     };
   }
@@ -372,6 +465,170 @@ Answer:`;
     return {
       score,
       explanation: content,
+      quotes: []
+    };
+  }
+
+  private async callPerplexityStream(prompt: string, onStream: (chunk: string) => void): Promise<LLMResponse> {
+    const apiKey = process.env.PERPLEXITY_API_KEY;
+    if (!apiKey) {
+      throw new Error('Perplexity API key not configured on server');
+    }
+
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'sonar',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert text analyst.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.2,
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Perplexity API error: ${response.statusText}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Failed to get response stream reader');
+    }
+
+    let fullText = '';
+    const decoder = new TextDecoder();
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices[0]?.delta?.content;
+              if (content) {
+                fullText += content;
+                onStream(content);
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              continue;
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    const score = this.deriveScoreFromAnswer(fullText);
+    
+    return {
+      score,
+      explanation: fullText.trim(),
+      quotes: []
+    };
+  }
+
+  private async callDeepSeekStream(prompt: string, onStream: (chunk: string) => void): Promise<LLMResponse> {
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    if (!apiKey) {
+      throw new Error('DeepSeek API key not configured on server');
+    }
+
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'deepseek-chat',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert text analyst.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.2,
+        stream: true,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`DeepSeek API error: ${response.statusText}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error('Failed to get response stream reader');
+    }
+
+    let fullText = '';
+    const decoder = new TextDecoder();
+    
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') break;
+            
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices[0]?.delta?.content;
+              if (content) {
+                fullText += content;
+                onStream(content);
+              }
+            } catch (e) {
+              // Skip invalid JSON lines
+              continue;
+            }
+          }
+        }
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    const score = this.deriveScoreFromAnswer(fullText);
+    
+    return {
+      score,
+      explanation: fullText.trim(),
       quotes: []
     };
   }
