@@ -188,9 +188,9 @@ export function useAnalysisStream(analysisId: string | null) {
                 id: analysisData.id,
                 overallScore: analysisData.overallScore,
                 processingTime: analysisData.processingTime || 0,
-                results: analysisData.results?.results || [],
-                document2Results: analysisData.results?.document2Results,
-                comparisonResults: analysisData.results?.comparisonResults,
+                results: analysisData.results || [],
+                document2Results: analysisData.document2Results,
+                comparisonResults: analysisData.comparisonResults,
               };
               setAnalysis(transformedAnalysis);
               setIsComplete(true);
