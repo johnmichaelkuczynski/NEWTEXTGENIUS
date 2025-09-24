@@ -4,7 +4,16 @@
 
 The Originality Meter is a sophisticated text analysis application that evaluates documents across four key dimensions: originality, intelligence, cogency, and overall quality. The application supports both single and dual document analysis modes, offering users the flexibility to analyze individual texts or compare pairs of documents. Built as a full-stack web application, it leverages multiple LLM providers (Anthropic, OpenAI, Perplexity, and DeepSeek) to provide comprehensive assessments with detailed scoring and qualitative feedback.
 
-## Recent Updates (August 31, 2025)
+## Recent Updates (September 24, 2025)
+
+✅ **FIXED: Long Document Processing Crashes**
+- Resolved critical `require()` import error in ESM TypeScript that was causing crashes when processing longer documents
+- System now successfully processes documents in small chunks (1000 words each) with 3-second delays between LLM API calls
+- Eliminated "ReferenceError: require is not defined" that prevented analysis of documents over 2500 words
+- Chunking system was already properly implemented but was being blocked by the import error
+- App now handles large academic papers and documents reliably without crashing
+
+## Previous Updates (August 31, 2025)
 
 ✅ **MAJOR: Eliminated User API Key Requirement**
 - Removed confusing API key configuration modal that was bothering users
