@@ -404,6 +404,7 @@ async function processDocument(
       const question = questions[i];
       console.log(`⚡ QUICK Q${i+1}/${questions.length}: ${question}`);
       
+      // Send progress update BEFORE starting the question
       if (analysisId) {
         sendProgressUpdate(analysisId, {
           status: 'processing_question', 
@@ -411,7 +412,9 @@ async function processDocument(
           currentStep: 'question_analysis',
           currentQuestion: question,
           questionIndex: i + 1,
-          totalQuestions: questions.length
+          totalQuestions: questions.length,
+          chunkIndex: 1,
+          totalChunks: 1
         });
       }
 
@@ -447,6 +450,19 @@ async function processDocument(
         });
         
         console.log(`⚡ QUICK Q${i+1} COMPLETE: Score ${result.score}`);
+        
+        // Send completion update for this question
+        if (analysisId) {
+          sendProgressUpdate(analysisId, {
+            status: 'question_completed',
+            message: `Completed: ${question}`,
+            currentStep: 'question_completed',
+            currentQuestion: question,
+            questionIndex: i + 1,
+            totalQuestions: questions.length,
+            score: result.score
+          });
+        }
         
       } catch (error) {
         console.error(`⚡ QUICK Q${i+1} ERROR:`, error);
