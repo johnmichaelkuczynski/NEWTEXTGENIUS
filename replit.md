@@ -4,7 +4,25 @@
 
 The Originality Meter is a sophisticated text analysis application that evaluates documents across four key dimensions: originality, intelligence, cogency, and overall quality. The application supports both single and dual document analysis modes, offering users the flexibility to analyze individual texts or compare pairs of documents. Built as a full-stack web application, it leverages multiple LLM providers (Anthropic, OpenAI, Perplexity, and DeepSeek) to provide comprehensive assessments with detailed scoring and qualitative feedback.
 
-## Recent Updates (September 24, 2025)
+## Recent Updates (October 4, 2025)
+
+✅ **CRITICAL FIX: Eliminated Contradictory Scoring Bug**
+- Fixed major bug where LLM gave high scores (96/100) while explaining why content was phony/not insightful
+- Root cause: Broken keyword matching in `deriveScoreFromAnswer()` that searched for words like "genuine", "insight" anywhere in response
+- Example of bug: Answer "No, lacks genuine insight" triggered score=96 due to keyword "genuine"
+- **Solution**: Completely rewrote LLM prompts with explicit scoring rubric and structured response format
+- Implemented multi-strategy score parsing: JSON format (OpenAI/Perplexity) → Plain text "Score: X" (Anthropic) → Conservative fallback (70)
+- Added explicit scoring rubric: 0-40 (fails insight), 41-70 (orthodox), 71-85 (above average), 86-95 (genuinely insightful), 96-100 (exceptional)
+- Removed all keyword-based score derivation to prevent contradictions
+- **Verified**: Genuine philosophical insight now scores 88/88/88, phony academic jargon scores 25/25/25
+
+✅ **Streaming Text Persistence Confirmed Working**
+- Verified streaming transcript is preserved via refs (`streamingTextRef`) in `use-analysis-stream.ts`
+- Streaming text is attached to final analysis results as `streamingTranscript` field
+- Results display properly shows complete word-by-word generation after analysis completes
+- Users can review the full LLM reasoning process in results view
+
+## Previous Updates (September 24, 2025)
 
 ✅ **FIXED: Long Document Processing Crashes**
 - Resolved critical `require()` import error in ESM TypeScript that was causing crashes when processing longer documents
