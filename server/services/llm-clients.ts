@@ -612,37 +612,36 @@ Explanation: [Your detailed explanation that MATCHES the score - if you score it
   }
 
   private deriveScoreFromAnswer(answer: string): number {
-    // NEW APPROACH: Parse score from "Score: X" format
-    const scoreMatch = answer.match(/Score:\s*(\d+)/i);
+    const trimmed = answer.trim();
+    
+    // Strategy 1: Try parsing as JSON (for OpenAI/Perplexity JSON mode responses)
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        // Look for score field (case-insensitive)
+        const score = parsed.score || parsed.Score || parsed.SCORE;
+        if (typeof score === 'number' && score >= 0 && score <= 100) {
+          return score;
+        }
+      } catch (e) {
+        // Not valid JSON, continue to next strategy
+      }
+    }
+    
+    // Strategy 2: Parse "Score: X" plain text format (for Anthropic/Claude responses)
+    const scoreMatch = trimmed.match(/Score:\s*(\d+)/i);
     if (scoreMatch) {
       const score = parseInt(scoreMatch[1]);
-      // Validate score is in range
       if (score >= 0 && score <= 100) {
         return score;
       }
     }
     
-    // Fallback: If no explicit score found, try to extract from explanation
-    const lowerAnswer = answer.toLowerCase();
+    // Strategy 3: Conservative fallback
+    console.warn('⚠️  LLM response missing expected score format (JSON or "Score: X"), using neutral default (70)');
+    console.warn('Response preview:', trimmed.substring(0, 200));
     
-    // Check for explicit quality indicators
-    if (lowerAnswer.includes('exceptional') || lowerAnswer.includes('paradigm')) {
-      return 95;
-    }
-    if (lowerAnswer.includes('genuinely insightful') || lowerAnswer.includes('real philosophical depth')) {
-      return 88;
-    }
-    if (lowerAnswer.includes('above average') || lowerAnswer.includes('some originality')) {
-      return 78;
-    }
-    if (lowerAnswer.includes('orthodox') || lowerAnswer.includes('lacks originality')) {
-      return 60;
-    }
-    if (lowerAnswer.includes('phony') || lowerAnswer.includes('pseudo-intellectual') || lowerAnswer.includes('fails')) {
-      return 35;
-    }
-    
-    // Conservative default - middle of road
+    // Return neutral score to prevent contradictions
     return 70;
   }
 }
