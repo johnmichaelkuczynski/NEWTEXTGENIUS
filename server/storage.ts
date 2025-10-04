@@ -24,6 +24,7 @@ export class MemStorage implements IStorage {
       analysisMode: insertAnalysis.analysisMode,
       document1Text: insertAnalysis.document1Text,
       document2Text: insertAnalysis.document2Text || null,
+      status: "pending",
       results: {},
       overallScore: null,
       processingTime: null,
@@ -39,7 +40,7 @@ export class MemStorage implements IStorage {
 
   async updateAnalysisResults(
     id: string,
-    results: any,
+    resultsData: any,
     overallScore: number,
     processingTime: number
   ): Promise<Analysis> {
@@ -48,9 +49,11 @@ export class MemStorage implements IStorage {
       throw new Error("Analysis not found");
     }
 
+    // Store all results data in the results JSONB field
     const updatedAnalysis: Analysis = {
       ...analysis,
-      results,
+      status: "complete",
+      results: resultsData, // Store entire results object as JSONB
       overallScore,
       processingTime,
     };

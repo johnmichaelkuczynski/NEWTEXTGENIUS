@@ -242,7 +242,7 @@ export default function Home() {
         <ProgressTracker
           isVisible={isAnalyzing || !!progress}
           currentStep={progress?.questionIndex || 1}
-          totalSteps={progress?.totalQuestions || 4}
+          totalSteps={progress?.totalQuestions || (config.analysisMode === 'quick' ? 3 : 4)}
           currentPhase={progress?.currentQuestion ? `Analyzing: ${progress.currentQuestion}` : progress?.message || "Processing Document - Analyzing text..."}
           currentAction={progress?.chunkIndex && progress?.totalChunks ? `Processing chunk ${progress.chunkIndex}/${progress.totalChunks}` : "Evaluating cognitive protocol..."}
           showPhaseDetails={config.analysisMode === 'comprehensive'}

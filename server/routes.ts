@@ -465,6 +465,18 @@ async function processDocument(
     }
 
     console.log(`⚡ BULLETPROOF QUICK MODE COMPLETE: ${results.length} questions processed`);
+    
+    // Send final completion status
+    if (analysisId) {
+      sendProgressUpdate(analysisId, {
+        status: 'completed',
+        message: 'Quick analysis complete!',
+        currentStep: 'complete',
+        questionIndex: questions.length,
+        totalQuestions: questions.length
+      });
+    }
+    
     return results;
   }
 
@@ -705,7 +717,7 @@ function generateTextReport(analysis: any): string {
       report += `Question ${index + 1}: ${result.question}\n`;
       report += `Score: ${result.score}/100\n`;
       report += `Explanation: ${result.explanation}\n`;
-      if (result.quotes.length > 0) {
+      if (result.quotes && result.quotes.length > 0) {
         report += `Key Quotes:\n`;
         result.quotes.forEach((quote: string) => {
           report += `  - "${quote}"\n`;
@@ -723,7 +735,7 @@ function generateTextReport(analysis: any): string {
       report += `Question ${index + 1}: ${result.question}\n`;
       report += `Score: ${result.score}/100\n`;
       report += `Explanation: ${result.explanation}\n`;
-      if (result.quotes.length > 0) {
+      if (result.quotes && result.quotes.length > 0) {
         report += `Key Quotes:\n`;
         result.quotes.forEach((quote: string) => {
           report += `  - "${quote}"\n`;
