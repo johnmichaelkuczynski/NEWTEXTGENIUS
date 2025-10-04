@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { AnalysisResult } from '@shared/schema';
 
 interface StreamEvent {
@@ -44,6 +44,9 @@ export function useAnalysisStream(analysisId: string | null) {
   const [progress, setProgress] = useState<ProgressState | null>(null);
   const [streamingText, setStreamingText] = useState<string>('');
   const maxReconnectAttempts = 5;
+  
+  // CRITICAL FIX: Use ref to capture latest streaming text in EventSource handlers
+  const streamingTextRef = useRef<string>('');
 
   const connectToStream = useCallback(() => {
     if (!analysisId) return;
@@ -72,6 +75,7 @@ export function useAnalysisStream(analysisId: string | null) {
             if (data.streamChunk && data.status === 'streaming') {
               setStreamingText(prev => {
                 const updated = prev + data.streamChunk;
+                streamingTextRef.current = updated; // Keep ref in sync
                 // Update progress state with synchronized streaming text
                 setProgress({
                   status: data.status || 'processing',
@@ -93,6 +97,7 @@ export function useAnalysisStream(analysisId: string | null) {
                 const separator = prev ? '\n\n---\n\n' : '';
                 const questionHeader = `Question ${data.questionIndex}/${data.totalQuestions}: ${data.currentQuestion}\n\n`;
                 const updated = prev + separator + questionHeader;
+                streamingTextRef.current = updated; // Keep ref in sync
                 setProgress({
                   status: data.status || 'processing',
                   message: data.message || 'Processing...',
@@ -135,6 +140,7 @@ export function useAnalysisStream(analysisId: string | null) {
               // Only update if we have valid results data
               if (data.analysis.overallScore !== null && data.analysis.overallScore !== undefined) {
                 // Transform the analysis data to match our AnalysisResult interface
+                // CRITICAL: Attach the streaming text so it persists after completion
                 const transformedAnalysis: AnalysisResult = {
                   id: data.analysis.id,
                   overallScore: data.analysis.overallScore,
@@ -142,6 +148,7 @@ export function useAnalysisStream(analysisId: string | null) {
                   results: data.analysis.results || [],
                   document2Results: data.analysis.document2Results,
                   comparisonResults: data.analysis.comparisonResults,
+                  streamingTranscript: streamingTextRef.current, // Use ref to get latest text
                 };
                 setAnalysis(transformedAnalysis);
               }
@@ -150,6 +157,8 @@ export function useAnalysisStream(analysisId: string | null) {
 
           case 'complete':
             console.log('Analysis completed, closing stream');
+            // Update analysis with final streaming text before marking complete
+            setAnalysis(prev => prev ? {...prev, streamingTranscript: streamingTextRef.current} : prev);
             setIsComplete(true);
             setIsConnected(false);
             break;
@@ -218,6 +227,7 @@ export function useAnalysisStream(analysisId: string | null) {
     setReconnectAttempts(0);
     setProgress(null);
     setStreamingText('');
+    streamingTextRef.current = ''; // Reset ref too
   }, [analysisId]);
 
   // Fallback: Check analysis status via polling if streaming fails

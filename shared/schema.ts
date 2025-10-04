@@ -77,6 +77,7 @@ export const analysisResultSchema = z.object({
       document2: z.number(),
     }),
   }).optional(),
+  streamingTranscript: z.string().optional(), // Live analysis transcript that persists after completion
 });
 
 export type AnalysisResult = z.infer<typeof analysisResultSchema>;

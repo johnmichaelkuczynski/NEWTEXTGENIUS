@@ -107,6 +107,27 @@ export function ResultsDisplay({ results, isVisible, onDownloadReport, onNewAnal
             )}
           </div>
 
+          {/* STREAMING TRANSCRIPT - Keep the live analysis visible! */}
+          {results.streamingTranscript && (
+            <Card className="border-2 border-primary-200 bg-gray-50 mb-6">
+              <CardContent className="p-6">
+                <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
+                  <span className="mr-2">📝</span>
+                  Live Analysis Transcript
+                </h4>
+                <div 
+                  className="bg-white border border-gray-200 rounded-lg p-6 max-h-96 overflow-y-auto font-mono text-sm text-gray-800 whitespace-pre-wrap"
+                  data-testid="streaming-transcript"
+                >
+                  {results.streamingTranscript}
+                </div>
+                <p className="text-xs text-gray-500 mt-3">
+                  This is the complete word-by-word analysis as it was generated. Detailed results appear below.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Document 1 Results */}
           <div className="space-y-6">
             <h4 className="text-xl font-semibold text-gray-900">

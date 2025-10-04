@@ -241,10 +241,28 @@ export default function Home() {
         {/* Progress Tracker */}
         <ProgressTracker
           isVisible={isAnalyzing || !!progress}
-          currentStep={progress?.questionIndex || 1}
-          totalSteps={progress?.totalQuestions || (config.analysisMode === 'quick' ? 3 : 4)}
+          currentStep={(() => {
+            // For quick mode: pass question index directly (1-3)
+            if (config.analysisMode === 'quick') {
+              return progress?.questionIndex || 1;
+            }
+            // For comprehensive mode: map questions to phases (1-4)
+            const questionIndex = progress?.questionIndex || 1;
+            const totalQuestions = progress?.totalQuestions || 24;
+            const questionsPerPhase = Math.ceil(totalQuestions / 4);
+            return Math.min(4, Math.ceil(questionIndex / questionsPerPhase));
+          })()}
+          totalSteps={config.analysisMode === 'quick' ? 3 : 4}
           currentPhase={progress?.currentQuestion ? `Analyzing: ${progress.currentQuestion}` : progress?.message || "Processing Document - Analyzing text..."}
-          currentAction={progress?.chunkIndex && progress?.totalChunks ? `Processing chunk ${progress.chunkIndex}/${progress.totalChunks}` : "Evaluating cognitive protocol..."}
+          currentAction={
+            progress?.questionIndex && progress?.totalQuestions
+              ? `Question ${progress.questionIndex} of ${progress.totalQuestions}${
+                  progress?.chunkIndex && progress?.totalChunks 
+                    ? ` • Chunk ${progress.chunkIndex}/${progress.totalChunks}` 
+                    : ''
+                }`
+              : "Evaluating cognitive protocol..."
+          }
           showPhaseDetails={config.analysisMode === 'comprehensive'}
           onCancel={() => setIsAnalyzing(false)}
           streamingText={streamingText}
