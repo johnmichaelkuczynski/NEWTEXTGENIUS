@@ -110,30 +110,33 @@ export class LLMClients {
   }
 
   private buildAnalysisPrompt(text: string, question: string, phase: number = 1, previousScore?: number): string {
-    const phonyParadigmPassage = `In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content. It attempts to dissolve an epistemological dilemma of mental content by splitting the difference between two diametrically opposed accounts of content. John McDowell's minimal empiricism and Richard Gaskin's minimalist empiricism are two versions of transcendental empiricism. Transcendental empiricism itself originates with McDowell's work. This dissertation is divided into five parts. First, in the Introduction, I state the Wittgensteinian metaphilosophical orientation of transcendental empiricism. This metaphilosophical approach provides a plateau upon which much of the rest of this work may be examined. Second, I offer a detailed description of McDowell's minimal empiricism. Third, I critique Gaskin's critique and modification of McDowell's minimal empiricism. I argue that (1) Gaskin's critiques are faulty and that (2) Gaskin's minimalist empiricism is very dubious. Fourth, I scrutinize the alleged credentials of McDowell's minimal empiricism. I argue that McDowell's version of linguistic idealism is problematic. I then comment on a recent dialogue between transcendental empiricism and Hubert Dreyfus's phenomenology. The dialogue culminates with Dreyfus's accusation of the "Myth of the Mental." I argue that this accusation is correct in which case McDowell's direct realism is problematic. I conclude that minimal empiricism does not dissolve the dilemma of mental content. Finally, I argue that Tyler Burge successfully undermines the doctrine of disjunctivism, but disjunctivism is crucial for transcendental empiricism. Ultimately, however, I aim to show that transcendental empiricism is an attractive alternative to philosophies of mental content.`;
-    
-    const genuineInsightExamples = [
-      `One cannot have the concept of a red object without having the concept of an extended object. But the word "red" doesn't contain the word "extended." In general, our concepts are interconnected in ways in which the corresponding words are not interconnected. This is not an accidental fact about the English language or about any other language: it is inherent in what a language is that the cognitive abilities corresponding to a person's abilities to use words cannot possibly be reflected in semantic relations holding among those words. This fact in its turn is a consequence of the fact that expressions are, whereas concepts are not, digital structures, for which reason the ways in which cognitive abilities interact cannot possibly bear any significant resemblance to the ways in which expressions interact. Consequently, there is no truth to the contention that our thought-processes are identical with, or bear any resemblance to, the digital computations that mediate computer-activity.`,
-      `Sense-perceptions do not have to be deciphered if their contents are to be uploaded, the reason being that they are presentations, not representations. Linguistic expressions do have to be deciphered if their contents are to be uploaded, the reason being that they are representations, not presentations. It is viciously regressive to suppose that information-bearing mental entities are categorically in the nature of representations, as opposed to presentations, and it is therefore incoherent to suppose that thought is mediated by expressions or, therefore, by linguistic entities. Attempts to neutralize this criticism inevitably overextend the concept of what it is to be a linguistic symbol, the result being that such attempts eviscerate the very position that it is their purpose to defend. Also, it is inherent in the nature of such attempts that they assume the truth of the view that for a given mental entity to bear this as opposed to that information is for that entity to have this as opposed to that causal role. This view is demonstrably false, dooming to failure the just-mentioned attempts to defend the contention that thought is in all cases mediated by linguistic symbols.`,
-      `It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations. (ii) is subject to the qualification that we tend not to become aware of instances of causation as such except when two different causal lines---i.e. two different cases of persistence---intersect, resulting in a breakdown of some other case of persistence, this being why we tend to regard instances of causation as fundamentally disruptive, as opposed to preservative in nature. The meaning of (iii) is that spatiotemporal relations are causal relations considered in abstraction of the various specific differences holding between different kinds of causation.`
-    ];
+    const cognitiveProtocol = `You are an expert evaluator of philosophical and intellectual texts.
 
-    const cognitiveProtocol = `You are evaluating text for genuine intelligence and originality.
+SCORING RUBRIC - Apply these criteria rigorously:
+• 0-40: FAILS - Phony, incoherent, uses jargon to obfuscate, makes no real points, purely sequential organization
+• 41-70: COMPETENT - Clear and logical but conventional, lacks originality, follows standard templates
+• 71-85: ABOVE AVERAGE - Shows some originality but arguments remain somewhat conventional
 
-SCORING RUBRIC - Your score MUST align with your explanation:
-• 0-40: Fails basic criteria of insight. Phony, pseudo-intellectual, or incoherent content.
-• 41-70: Orthodox competence. Clear and logical but lacks genuine originality or depth.
-• 71-85: Above average. Shows some originality or insight but not exceptional.
-• 86-95: Genuinely insightful. Demonstrates real philosophical depth and original thinking.
-• 96-100: Exceptional. Paradigm of genuine intellectual achievement and novel insight.
+• 86-95: GENUINELY INSIGHTFUL - Must demonstrate MOST of these markers:
+  ✓ Makes novel philosophical distinctions that open new ways of thinking
+  ✓ Develops arguments organically where later points build on earlier ones
+  ✓ Integrates concepts systematically (shows system-level control)
+  ✓ Opens up new domains of inquiry rather than shutting them down
+  ✓ Uses examples/analogies that genuinely illuminate abstract points
+  ✓ Challenges conventional assumptions with coherent reasoning
+  ✓ Demonstrates intellectual depth through careful conceptual analysis
 
-CRITICAL: If you explain why something is phony/lacks insight, score it 0-40. If you explain why it demonstrates genuine insight, score it 86-100. NEVER give high scores (96/100) while explaining negative assessments.
+• 96-100: EXCEPTIONAL - All markers of 86-95 PLUS paradigm-shifting profundity
 
-PARADIGM OF PHONY CONTENT (should score ≤40):
-"${phonyParadigmPassage}"
+EVALUATION CRITERIA:
+1. Does it make GENUINE POINTS or just use technical terms without substance?
+2. Are ideas DEVELOPED ORGANICALLY or just listed sequentially?
+3. Does it OPEN UP new domains or shut off inquiry with circular logic?
+4. Is the writing DIRECT or EVASIVE?
+5. Does it exhibit SYSTEM-LEVEL CONTROL (integrating earlier points with later ones)?
+6. Is it REAL intellectual work or just presumed-smart due to subject matter?
 
-EXAMPLES OF GENUINE INSIGHT (should score 86-100):
-${genuineInsightExamples.map((example: string, i: number) => `EXAMPLE ${i + 1}: "${example}"`).join('\n\n')}
+CRITICAL INSTRUCTION: Evaluate the ACTUAL INTELLECTUAL CONTENT, not writing style or vocabulary complexity. Sophisticated philosophical writing with novel distinctions, organic argument development, and systematic integration scores 86-95. Do NOT penalize abstract/technical language if the IDEAS are genuinely insightful.
 
 TEXT TO ANALYZE:
 ${text}
@@ -143,7 +146,7 @@ QUESTION: ${question}
 Provide your analysis in this format:
 Score: [number 0-100]
 
-Explanation: [Your detailed explanation that MATCHES the score - if you score it 96/100, explain why it's genuinely insightful; if you score it 40/100, explain why it fails]`;
+Explanation: [Your explanation that MATCHES the score based on the criteria above]`;
 
     return cognitiveProtocol;
   }

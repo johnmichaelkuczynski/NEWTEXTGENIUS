@@ -51,11 +51,11 @@ export function getQuestions(parameter: string, mode: 'quick' | 'comprehensive',
   const questions = questionSets[parameter as keyof typeof questionSets] || questionSets.originality;
   
   if (mode === 'quick') {
-    // Ultra-fast questions for quick mode - require only short responses
+    // Fast but substantive questions for quick mode
     return [
-      'Rate the originality 0-100. Then give ONE sentence explanation.',
-      'Rate the intelligence 0-100. Then give ONE sentence explanation.', 
-      'Rate the overall quality 0-100. Then give ONE sentence explanation.'
+      'IS IT INSIGHTFUL? Does it make genuine points or just use technical terms? Does it develop ideas organically? Rate 0-100 and explain briefly.',
+      'IS IT REAL OR PHONY? Is it palpably smart or just presumed-smart due to subject matter? Does it show actual intellectual depth? Rate 0-100 and explain briefly.',
+      'OVERALL QUALITY: Does it open new domains or shut off inquiry? Does it integrate points systematically or just list them? Rate 0-100 and explain briefly.'
     ];
   }
   
