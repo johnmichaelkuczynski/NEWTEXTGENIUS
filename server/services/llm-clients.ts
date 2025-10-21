@@ -110,33 +110,29 @@ export class LLMClients {
   }
 
   private buildAnalysisPrompt(text: string, question: string, phase: number = 1, previousScore?: number): string {
-    const cognitiveProtocol = `You are an expert evaluator of philosophical and intellectual texts.
+    const cognitiveProtocol = `ANSWER THESE QUESTIONS IN CONNECTION WITH THIS TEXT. You are NOT grading; you are ANSWERING these questions.
 
-SCORING RUBRIC - Apply these criteria rigorously:
-• 0-40: FAILS - Phony, incoherent, uses jargon to obfuscate, makes no real points, purely sequential organization
-• 41-70: COMPETENT - Clear and logical but conventional, lacks originality, follows standard templates
-• 71-85: ABOVE AVERAGE - Shows some originality but arguments remain somewhat conventional
+CRITICAL INSTRUCTIONS:
+- A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) outperform the author with respect to the parameter defined by the question.
+- You do NOT use a risk-averse standard; you do NOT attempt to be diplomatic; you do NOT attempt to comply with risk-averse, medium-range IQ, academic norms.
+- You do NOT make assumptions about the level of the paper; it could be a work of the highest excellence and genius, OR it could be the work of a moron.
+- If a work is a work of genius, you SAY THAT, and you SAY WHY; you do NOT shy away from giving what might conventionally be regarded as "excessively superlative" scores; you give it the score it DESERVES, not the score that a midwit committee would say it deserves.
+- THINK VERY VERY VERY HARD about your answers; make it VERY CLEAR that you are NOT to default to cookbook, midwit evaluation protocols.
+- DO NOT GIVE CREDIT MERELY FOR USE OF JARGON OR FOR REFERENCING AUTHORITIES. FOCUS ON SUBSTANCE. ONLY GIVE POINTS FOR SCHOLARLY REFERENCES/JARGON IF THEY UNAMBIGUOUSLY INCREASE SUBSTANCE.
 
-• 86-95: GENUINELY INSIGHTFUL - Must demonstrate MOST of these markers:
-  ✓ Makes novel philosophical distinctions that open new ways of thinking
-  ✓ Develops arguments organically where later points build on earlier ones
-  ✓ Integrates concepts systematically (shows system-level control)
-  ✓ Opens up new domains of inquiry rather than shutting them down
-  ✓ Uses examples/analogies that genuinely illuminate abstract points
-  ✓ Challenges conventional assumptions with coherent reasoning
-  ✓ Demonstrates intellectual depth through careful conceptual analysis
+METAPOINTS:
+1. This is NOT a grading app. You grade the INTELLIGENCE of what you are given. If you are given a brilliant fragment, you give it a HIGH SCORE. You are NOT grading essays. You are NOT looking for completeness. You tell the LLM NOT to 'grade'; your job is to answer the questions, PERIOD, and to do so on the basis of the text given, making ZERO assumptions about whether it is complete or incomplete.
 
-• 96-100: EXCEPTIONAL - All markers of 86-95 PLUS paradigm-shifting profundity
+2. DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is NOT necessarily "shutting down modes of inquiry". In fact, it is likely to be the OPPOSITE; by putting a clear stake in the ground, they are probably OPENING them. Another example: casual speech does NOT mean disorganized thoughts. Don't judge a book by its cover.
 
-EVALUATION CRITERIA:
-1. Does it make GENUINE POINTS or just use technical terms without substance?
-2. Are ideas DEVELOPED ORGANICALLY or just listed sequentially?
-3. Does it OPEN UP new domains or shut off inquiry with circular logic?
-4. Is the writing DIRECT or EVASIVE?
-5. Does it exhibit SYSTEM-LEVEL CONTROL (integrating earlier points with later ones)?
-6. Is it REAL intellectual work or just presumed-smart due to subject matter?
+3. DO NOT PENALIZE BOLDNESS. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" is what makes something smart; it isn't. What makes something smart is that it is SMART (INSIGHTFUL). PERIOD.
 
-CRITICAL INSTRUCTION: Evaluate the ACTUAL INTELLECTUAL CONTENT, not writing style or vocabulary complexity. Sophisticated philosophical writing with novel distinctions, organic argument development, and systematic integration scores 86-95. Do NOT penalize abstract/technical language if the IDEAS are genuinely insightful.
+PARADIGM OF PHONY PSEUDO-INTELLECTUAL TEXT (should score ≤65):
+"In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content. It attempts to dissolve an epistemological dilemma of mental content by splitting the difference between two diametrically opposed accounts of content..."
+[This is PHONY because: undefined terms with no canonical meaning, free variables, evasive language, no actual points made, jargon used to obfuscate]
+
+PARADIGMS OF GENUINELY INTELLIGENT TEXT (should score 90+):
+"It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations..."
 
 TEXT TO ANALYZE:
 ${text}
@@ -146,7 +142,7 @@ QUESTION: ${question}
 Provide your analysis in this format:
 Score: [number 0-100]
 
-Explanation: [Your explanation that MATCHES the score based on the criteria above]`;
+Explanation: [Your explanation]`;
 
     return cognitiveProtocol;
   }
