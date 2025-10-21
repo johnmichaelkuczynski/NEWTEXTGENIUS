@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { Microscope } from 'lucide-react';
+import { Microscope, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +9,7 @@ import { AnalysisConfigPanel } from '@/components/analysis-config';
 import { DocumentInput } from '@/components/document-input';
 import { ProgressTracker } from '@/components/progress-tracker';
 import { ResultsDisplay } from '@/components/results-display';
+import { AIChat } from '@/components/ai-chat';
 import { useAnalysisStream } from '@/hooks/use-analysis-stream';
 import { AnalysisRequest, AnalysisResult } from '@shared/schema';
 
@@ -274,6 +275,24 @@ export default function Home() {
           isVisible={!!analysis}
           onDownloadReport={handleDownloadReport}
           onNewAnalysis={handleNewAnalysis}
+        />
+
+        {/* Feedback Button */}
+        <div className="fixed bottom-4 left-4 z-40">
+          <Button
+            onClick={() => window.open('https://forms.gle/your-feedback-form', '_blank')}
+            className="bg-blue-600 hover:bg-blue-700 shadow-lg"
+            data-testid="talk-back"
+          >
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Talk Back / Feedback
+          </Button>
+        </div>
+
+        {/* AI Chat Assistant - UNRESTRICTED, full context */}
+        <AIChat 
+          documentText={document1Text}
+          analysisResults={analysis}
         />
       </div>
     </div>

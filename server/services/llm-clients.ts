@@ -446,6 +446,36 @@ Explanation: [Your explanation]`;
     };
   }
 
+  // UNRESTRICTED chat interface - NO canned responses, NO restrictions
+  async chat(message: string, systemPrompt: string, conversationHistory: Array<{role: string, content: string}>): Promise<string> {
+    if (!this.anthropic) {
+      throw new Error('Anthropic API key not configured on server');
+    }
+
+    // Build messages array with full conversation history
+    const messages: Array<{role: 'user' | 'assistant', content: string}> = [
+      ...conversationHistory.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })),
+      { role: 'user' as const, content: message }
+    ];
+
+    const response = await this.anthropic.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL,
+      max_tokens: 4000, // Allow longer responses if needed
+      system: systemPrompt,
+      messages,
+    });
+
+    const content = response.content[0];
+    if (content.type !== 'text') {
+      throw new Error('Unexpected response type from Anthropic');
+    }
+
+    return content.text;
+  }
+
   private async callPerplexityStream(prompt: string, onStream: (chunk: string) => void): Promise<LLMResponse> {
     const apiKey = process.env.PERPLEXITY_API_KEY;
     if (!apiKey) {
