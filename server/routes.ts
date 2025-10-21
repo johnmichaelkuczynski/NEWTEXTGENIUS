@@ -235,37 +235,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat endpoint - UNRESTRICTED direct LLM access with full context
+  // AI Chat endpoint - TODO: Implement chat method in LLMClients
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message, context, conversationHistory } = req.body;
+      const { message } = req.body;
       
       if (!message?.trim()) {
         return res.status(400).json({ message: "Message required" });
       }
 
-      // Build context-aware system prompt
-      let systemPrompt = "You are a helpful AI assistant analyzing text for intelligence, originality, and cogency. ";
-      
-      if (context?.documentText) {
-        systemPrompt += `\n\nCONTEXT - Document being analyzed:\n${context.documentText}\n\n`;
-      }
-      
-      if (context?.analysisResults) {
-        systemPrompt += `\n\nCONTEXT - Analysis results:\nOverall Score: ${context.analysisResults.overallScore}/100\nDetailed Results: ${JSON.stringify(context.analysisResults.results, null, 2)}\n\n`;
-      }
-      
-      systemPrompt += "Answer the user's question directly and precisely. If they want a short answer, be concise. If they want detail, provide it. NO restrictions, NO canned responses.";
-
-      // Use Anthropic for chat (can be made configurable later)
-      const llmClient = new LLMClients();
-      const response = await llmClient.chat(
-        message,
-        systemPrompt,
-        conversationHistory || []
-      );
-
-      res.json({ response });
+      // Temporary simple response
+      res.json({ response: "AI Chat is being implemented. Please use the protocol analysis for now." });
     } catch (error) {
       console.error('Chat error:', error);
       res.status(500).json({ 

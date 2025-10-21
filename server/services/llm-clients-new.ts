@@ -101,38 +101,34 @@ export class LLMClients {
     let prompt = '';
 
     if (phase === 1) {
-      // CRITICAL SCORING ENFORCEMENT FIRST
-      prompt += `⚠️ CRITICAL SCORING RULES - READ CAREFULLY:
+      // ULTRA-AGGRESSIVE SCORING ENFORCEMENT - FIRST AND CRYSTAL CLEAR
+      prompt += `🚨 SCORING SEMANTICS - THIS IS NOT NEGOTIABLE 🚨
 
-1. A score of N/100 means (100-N)% of people outperform the author on that parameter.
-   - Score of 25/100 = 75% of people are smarter = RETARDED
-   - Score of 73/100 = 27% of people are smarter = SLIGHTLY ABOVE AVERAGE
-   - Score of 96/100 = 4% of people are smarter = GENUINELY EXCEPTIONAL
+WHAT A SCORE MEANS (READ THIS 3 TIMES):
+• Score of 96/100 = Only 4% of humans are smarter = GENUINELY EXCEPTIONAL INTELLIGENCE
+• Score of 85/100 = 15% are smarter = WELL ABOVE AVERAGE  
+• Score of 73/100 = 27% are smarter = SLIGHTLY ABOVE AVERAGE
+• Score of 50/100 = 50% are smarter = EXACTLY AVERAGE
+• Score of 25/100 = 75% are smarter = WELL BELOW AVERAGE (BORDERLINE RETARDED)
 
-2. MIDRANGE SCORES (70-85) ARE FORBIDDEN UNLESS JUSTIFIED:
-   - If the text is genuinely insightful and intelligent → Score 90-100
-   - If the text is phony academic jargon → Score 0-65
-   - DO NOT give safe middling scores to avoid commitment
-   - Scores in the 70s-80s = you are hedging = AUTOMATIC FAILURE
+⛔ FORBIDDEN BEHAVIOR ⛔
+NEVER give "safe" scores in the 70-85 range to avoid commitment. That is HEDGING and is WRONG.
+If you're unsure, go LOWER (≤65) or HIGHER (≥90). No middle ground.
 
-3. THIS PARADIGM TEXT MUST SCORE ≤65:
+📊 CORRECT SCORING FOR CLEAR CASES:
+✓ Genuine philosophical insight (original ideas, coherent logic) → 90-100
+✓ Mediocre but coherent everyday writing → 45-55  
+✓ Phony academic jargon (no actual insight, buzzwords) → 0-40
+
+🔍 CALIBRATION TEST - THIS TEXT MUST SCORE ≤40:
 "${PHONY_PARADIGM}"
-If you would score it higher, you have failed to understand the task.
+(It sounds smart but has zero actual insight - just references to doctrines without developing ideas)
 
-4. INTELLIGENT PHILOSOPHICAL ANALYSIS (like solving the Raven Paradox with principled generalizations) MUST SCORE 95+
-   - If it shows genuine insight → 95-100
-   - If it's phony → 0-65
-   - NO MIDDLE GROUND FOR CLEAR CASES
-
-5. YOU MUST ANSWER ALL ${questions.length} QUESTIONS INDIVIDUALLY
-   - Each question gets its own score 0-100
-   - Then provide overall assessment
-
-NOW ANALYZE THIS TEXT:
+===== NOW ANALYZE THIS TEXT =====
 
 ${text}
 
-ANSWER EVERY ONE OF THESE ${questions.length} QUESTIONS:
+===== ANSWER ALL ${questions.length} QUESTIONS BELOW =====
 
 `;
       questions.forEach((question, index) => {
@@ -149,21 +145,23 @@ ANSWER EVERY ONE OF THESE ${questions.length} QUESTIONS:
         prompt += getPsychopathologicalInstructions();
       }
 
-      prompt += `\n\nRESPONSE FORMAT:
+      prompt += `\n\n===== REQUIRED RESPONSE FORMAT =====
+
 For EACH of the ${questions.length} questions above:
-Question [N]: [restate question]
+
+Question [N]: [question text]
 Score: [0-100]
-Explanation: [your answer - be specific about why this score]
+Reasoning: [WHY this score - be specific]
 
-After answering all ${questions.length} questions individually:
+After answering ALL ${questions.length} questions:
+
 OVERALL SCORE: [0-100]
-SUMMARY: [overall assessment]
+SUMMARY: [comprehensive assessment]
 
-REMEMBER: 
-- Scores 70-85 = hedging = failure
-- Genuinely intelligent text = 90-100
-- Phony academic jargon = 0-65
-- ${questions.length} questions MUST be answered individually`;
+⚠️ FINAL REMINDERS:
+• Midrange scores (70-85) only if genuinely justified - otherwise go lower or higher
+• ${questions.length} questions MUST ALL be answered individually
+• Score reflects percentile: 96 = top 4%, 50 = exactly average, 25 = bottom 25%`;
       
     } else if (phase === 2 && previousScore !== undefined) {
       // Phase 2: Pushback if score < 95

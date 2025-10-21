@@ -2,9 +2,26 @@
 
 ## Overview
 
-The Originality Meter is a sophisticated text analysis application that evaluates documents across four key dimensions: originality, intelligence, cogency, and overall quality. The application supports both single and dual document analysis modes, offering users the flexibility to analyze individual texts or compare pairs of documents. Built as a full-stack web application, it leverages multiple LLM providers (Anthropic, OpenAI, Perplexity, and DeepSeek) to provide comprehensive assessments with detailed scoring and qualitative feedback.
+Text Genius is a sophisticated text analysis application that evaluates documents across three assessment types (Cognitive Capability, Psychological Characteristics, Psychopathology) with six modes (Normal/Comprehensive for each type). The application uses EXACT user-specified protocols with ALL questions verbatim. Built as a full-stack web application, it leverages multiple LLM providers displayed as ZHI 1/2/3/4 (OpenAI/Anthropic/DeepSeek/Perplexity) to provide comprehensive assessments with strict scoring semantics.
 
 ## Recent Updates (October 21, 2025)
+
+🚨 **CRITICAL SCORING SYSTEM REWRITE - IN PROGRESS**
+- Completely rewrote Phase 1 prompt with ultra-aggressive scoring semantics enforcement
+- Added crystal-clear percentile explanation: 96/100 = top 4%, 25/100 = bottom 25%  
+- Explicitly forbids midrange hedging (70-85 scores) unless genuinely justified
+- Calibration test built into prompt: phony paradigm text MUST score ≤40
+- Scoring bands clarified: Genuine insight (90-100), Mediocre (45-55), Phony (0-40)
+- **TESTING REQUIRED**: Need to verify genuine philosophical text now scores 95+ instead of 25
+
+✅ **UI Improvements**
+- Made main document input box 600px tall (was 256px) - more than 2X bigger
+- Input box now resizable for handling massive documents
+- Removed floating AI chat button per user feedback
+- Added BIG inline AI chat section (600px) directly on page - always visible
+- Everything on ONE page with no tabs or page switching
+
+## Previous Updates (October 21, 2025)
 
 ✅ **SCORING SYSTEM COMPLETELY FIXED**
 - Genuinely insightful philosophical texts now correctly score 90+ across all LLMs
