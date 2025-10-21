@@ -168,23 +168,55 @@ export default function Home() {
     return mode === 'normal' ? 'Normal (Phase 1 only)' : 'Comprehensive (Phases 1-4)';
   };
 
+  const [activeTab, setActiveTab] = useState<'chat' | 'analyze'>('chat');
+  const [chatDocument, setChatDocument] = useState('');
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Microscope className="text-primary-600 h-8 w-8 mr-3" />
-              <h1 className="text-xl font-bold text-gray-900">Text Genius</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Advanced Text Analysis</span>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center">
+                <Microscope className="text-primary-600 h-8 w-8 mr-3" />
+                <h1 className="text-xl font-bold text-gray-900">Text Genius</h1>
+              </div>
+              {/* BIG TAB BUTTONS */}
+              <div className="flex gap-4">
+                <Button
+                  variant={activeTab === 'chat' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('chat')}
+                  className="text-base px-6 py-5 font-bold"
+                  data-testid="tab-chat"
+                >
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  💬 AI CHAT - INSTANT FEEDBACK
+                </Button>
+                <Button
+                  variant={activeTab === 'analyze' ? 'default' : 'outline'}
+                  onClick={() => setActiveTab('analyze')}
+                  className="text-base px-6 py-5 font-bold"
+                  data-testid="tab-analyze"
+                >
+                  <Microscope className="mr-2 h-5 w-5" />
+                  🔬 PROTOCOL ANALYSIS
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
+      {/* BIG AI CHAT INTERFACE */}
+      {activeTab === 'chat' && (
+        <div className="h-[calc(100vh-80px)] flex flex-col">
+          <AIChat documentText={chatDocument} analysisResults={analysis} />
+        </div>
+      )}
+
+      {/* ANALYSIS INTERFACE */}
+      {activeTab === 'analyze' && (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Configuration Panel */}
@@ -292,12 +324,8 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* AI Chat Assistant - UNRESTRICTED, full context */}
-        <AIChat 
-          documentText={document1Text}
-          analysisResults={analysis}
-        />
       </div>
+      )}
     </div>
   );
 }
