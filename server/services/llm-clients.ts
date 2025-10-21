@@ -110,39 +110,40 @@ export class LLMClients {
   }
 
   private buildAnalysisPrompt(text: string, question: string, phase: number = 1, previousScore?: number): string {
-    const cognitiveProtocol = `ANSWER THESE QUESTIONS IN CONNECTION WITH THIS TEXT. You are NOT grading; you are ANSWERING these questions.
-
-CRITICAL INSTRUCTIONS:
-- A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) outperform the author with respect to the parameter defined by the question.
-- You do NOT use a risk-averse standard; you do NOT attempt to be diplomatic; you do NOT attempt to comply with risk-averse, medium-range IQ, academic norms.
-- You do NOT make assumptions about the level of the paper; it could be a work of the highest excellence and genius, OR it could be the work of a moron.
-- If a work is a work of genius, you SAY THAT, and you SAY WHY; you do NOT shy away from giving what might conventionally be regarded as "excessively superlative" scores; you give it the score it DESERVES, not the score that a midwit committee would say it deserves.
-- THINK VERY VERY VERY HARD about your answers; make it VERY CLEAR that you are NOT to default to cookbook, midwit evaluation protocols.
-- DO NOT GIVE CREDIT MERELY FOR USE OF JARGON OR FOR REFERENCING AUTHORITIES. FOCUS ON SUBSTANCE. ONLY GIVE POINTS FOR SCHOLARLY REFERENCES/JARGON IF THEY UNAMBIGUOUSLY INCREASE SUBSTANCE.
-
-METAPOINTS:
-1. This is NOT a grading app. You grade the INTELLIGENCE of what you are given. If you are given a brilliant fragment, you give it a HIGH SCORE. You are NOT grading essays. You are NOT looking for completeness. You tell the LLM NOT to 'grade'; your job is to answer the questions, PERIOD, and to do so on the basis of the text given, making ZERO assumptions about whether it is complete or incomplete.
-
-2. DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is NOT necessarily "shutting down modes of inquiry". In fact, it is likely to be the OPPOSITE; by putting a clear stake in the ground, they are probably OPENING them. Another example: casual speech does NOT mean disorganized thoughts. Don't judge a book by its cover.
-
-3. DO NOT PENALIZE BOLDNESS. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" is what makes something smart; it isn't. What makes something smart is that it is SMART (INSIGHTFUL). PERIOD.
-
-PARADIGM OF PHONY PSEUDO-INTELLECTUAL TEXT (should score ≤65):
-"In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content. It attempts to dissolve an epistemological dilemma of mental content by splitting the difference between two diametrically opposed accounts of content..."
-[This is PHONY because: undefined terms with no canonical meaning, free variables, evasive language, no actual points made, jargon used to obfuscate]
-
-PARADIGMS OF GENUINELY INTELLIGENT TEXT (should score 90+):
-"It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations..."
+    const cognitiveProtocol = `ANSWER THIS QUESTION IN CONNECTION WITH THIS TEXT. You are NOT grading; you are ANSWERING this question.
 
 TEXT TO ANALYZE:
 ${text}
 
 QUESTION: ${question}
 
-Provide your analysis in this format:
+SCORING INTERPRETATION:
+- A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) of people outperform the author with respect to this parameter.
+- You are NOT grading; you are ANSWERING the question.
+- You do NOT use a risk-averse standard; you do NOT attempt to be diplomatic; you do NOT attempt to comply with risk-averse, medium-range IQ, academic norms.
+- You do NOT make assumptions about the level of the text; it could be work of the highest excellence and genius, OR it could be the work of a moron.
+- If a work is genius, you SAY THAT and SAY WHY; you do NOT shy away from giving "excessively superlative" scores; you give it the score it DESERVES, not the score that a midwit committee would say it deserves.
+- THINK VERY VERY VERY HARD about your answer; do NOT default to cookbook, midwit protocols.
+- DO NOT GIVE CREDIT FOR JARGON OR AUTHORITIES. FOCUS ON SUBSTANCE. Only give points for jargon/references if they UNAMBIGUOUSLY INCREASE SUBSTANCE.
+
+METAPOINTS:
+1. This is NOT a grading app. If given a brilliant fragment, give it a HIGH SCORE. You are NOT grading essays. NOT looking for completeness. Your job is to answer the question, PERIOD, making ZERO assumptions about whether it is complete or incomplete.
+
+2. DO NOT OVERVALUE TURNS OF PHRASE. An author speaking confidently is NOT necessarily "shutting down inquiry". In fact, by putting a clear stake in the ground, they are probably OPENING inquiry. Casual speech does NOT mean disorganized thoughts. Don't judge a book by its cover.
+
+3. DO NOT PENALIZE BOLDNESS. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" makes something smart; it isn't. What makes something smart is that it is SMART (INSIGHTFUL). PERIOD.
+
+PARADIGM OF PHONY PSEUDO-INTELLECTUAL TEXT (should score ≤65):
+"In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content..."
+[PHONY because: undefined terms with no canonical meaning, free variables, evasive language, no actual points, jargon used to obfuscate]
+
+PARADIGM OF GENUINELY INTELLIGENT TEXT (should score 90+):
+"It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations. (ii) is subject to the qualification that we tend not to become aware of instances of causation as such except when two different causal lines---i.e. two different cases of persistence---intersect, resulting in a breakdown of some other case of persistence, this being why we tend to regard instances of causation as fundamentally disruptive, as opposed to preservative in nature. The meaning of (iii) is that spatiotemporal relations are causal relations considered in abstraction of the various specific differences holding between different kinds of causation."
+
+ANSWER FORMAT:
 Score: [number 0-100]
 
-Explanation: [Your explanation]`;
+Explanation: [Your direct answer to the question]`;
 
     return cognitiveProtocol;
   }
