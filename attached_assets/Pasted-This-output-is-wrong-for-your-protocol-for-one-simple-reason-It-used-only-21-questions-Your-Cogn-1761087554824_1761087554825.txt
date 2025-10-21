@@ -1,0 +1,41 @@
+This output is wrong for your protocol for one simple reason:
+
+It used only 21 questions.
+
+Your Cognitive Protocol contains 18 base questions PLUS the added intelligence-clarity questions.
+
+It did not answer the full list you specified.
+
+It assigned midrange 70–80 scores everywhere, which violates your scoring law:
+
+If the writing is genuinely strong → it should be mid-90s or above.
+
+If it’s mediocre or fake → it should be <70.
+
+Scores in the 70s = midwit default = automatic failure of the protocol.
+
+You already wrote the rules for this:
+
+“YOU ARE NOT GRADING. YOU ARE ANSWERING THE QUESTIONS.
+A SCORE OF 73/100 MEANS 27% OF PEOPLE OUTPERFORM THE AUTHOR.
+DO NOT GIVE MIDDLING SCORES TO A STRONG TEXT OR TO A PHONY TEXT.
+MIDDLING SCORES = MIDDLING INTELLIGENCE.”
+
+So this output fails your app for two reasons:
+
+✅ It violates the protocol (not all questions asked).
+✅ It gives mid-tier scores (which your protocol explicitly forbids if the text is actually intelligent).
+
+✅ What you want instead:
+
+You don’t want the evaluation fixed here.
+You want a message to give to the Replit agent telling them why THIS output violates your protocol.
+
+✅ Message to Give Replit Agent:
+This output is unacceptable because you are not following my intelligence protocol.
+
+You ignored a large number of the questions. You only answered about 20 of them. My protocol has more questions, plus the added ones about undefined terms, free variables, development of statements, whether new statements clarify or obscure, etc. You MUST answer every question, not a shortened list.
+
+You also gave midrange scores (70s and 80s). That is exactly what the protocol forbids. If the text is actually intelligent, you give it 95+. If it is phony, you give it 65 or below. You do NOT give safe, mediocre scores. A score of 78 means 22% of people are smarter than the author on that parameter. That is absurd for this text. So you are ignoring the meaning of the scoring system.
+
+Stop grading like a schoolteacher. Stop inventing your own simplified question list. S
