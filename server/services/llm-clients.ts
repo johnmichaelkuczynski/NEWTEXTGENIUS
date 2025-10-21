@@ -118,13 +118,18 @@ ${text}
 QUESTION: ${question}
 
 SCORING INTERPRETATION:
-- A score of N/100 (e.g. 73/100) means that (100-N)/100 (e.g. 27/100) of people outperform the author with respect to this parameter.
+- Score of N/100 means (100-N)% of all people outperform the author
+- 50 = Average | 70 = Educated layperson | 82 = Competent academic | 90 = Top 10% (genuinely insightful) | 95 = Top 5%
+
+REALITY CHECK: MOST PEOPLE CANNOT THINK CLEARLY. MOST ACADEMICS CANNOT MAKE NOVEL POINTS.
+If you see text that makes real distinctions (not clichés), develops ideas organically (not lists), integrates concepts systematically → THIS IS RARE. IT'S 90+.
+
 - You are NOT grading; you are ANSWERING the question.
-- You do NOT use a risk-averse standard; you do NOT attempt to be diplomatic; you do NOT attempt to comply with risk-averse, medium-range IQ, academic norms.
-- You do NOT make assumptions about the level of the text; it could be work of the highest excellence and genius, OR it could be the work of a moron.
-- If a work is genius, you SAY THAT and SAY WHY; you do NOT shy away from giving "excessively superlative" scores; you give it the score it DESERVES, not the score that a midwit committee would say it deserves.
-- THINK VERY VERY VERY HARD about your answer; do NOT default to cookbook, midwit protocols.
-- DO NOT GIVE CREDIT FOR JARGON OR AUTHORITIES. FOCUS ON SUBSTANCE. Only give points for jargon/references if they UNAMBIGUOUSLY INCREASE SUBSTANCE.
+- You do NOT use a risk-averse standard; you do NOT attempt to be diplomatic.
+- You do NOT make assumptions; it could be genius OR moronic.
+- If a work is genius, give it 90+; do NOT shy away from "excessively superlative" scores.
+- THINK VERY HARD; do NOT default to cookbook, midwit protocols.
+- DO NOT GIVE CREDIT FOR JARGON OR AUTHORITIES. FOCUS ON SUBSTANCE ONLY.
 
 METAPOINTS:
 1. This is NOT a grading app. If given a brilliant fragment, give it a HIGH SCORE. You are NOT grading essays. NOT looking for completeness. Your job is to answer the question, PERIOD, making ZERO assumptions about whether it is complete or incomplete.
@@ -133,12 +138,25 @@ METAPOINTS:
 
 3. DO NOT PENALIZE BOLDNESS. DO NOT take points away for insights that, if correct, stand on their own. Get rid of the idea that "argumentation" makes something smart; it isn't. What makes something smart is that it is SMART (INSIGHTFUL). PERIOD.
 
-PARADIGM OF PHONY PSEUDO-INTELLECTUAL TEXT (should score ≤65):
-"In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content..."
-[PHONY because: undefined terms with no canonical meaning, free variables, evasive language, no actual points, jargon used to obfuscate]
+WHAT SCORES ≤65 (PHONY):
+Text with undefined jargon, free variables, evasive language, no actual substance - just impostor scaffolding.
+Example: "In this dissertation, I critically examine the philosophy of transcendental empiricism. Transcendental empiricism is, among other things, a philosophy of mental content..." [Undefined terms, says nothing]
 
-PARADIGM OF GENUINELY INTELLIGENT TEXT (should score 90+):
-"It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations. (ii) is subject to the qualification that we tend not to become aware of instances of causation as such except when two different causal lines---i.e. two different cases of persistence---intersect, resulting in a breakdown of some other case of persistence, this being why we tend to regard instances of causation as fundamentally disruptive, as opposed to preservative in nature. The meaning of (iii) is that spatiotemporal relations are causal relations considered in abstraction of the various specific differences holding between different kinds of causation."
+WHAT SCORES 90+ (GENUINELY INTELLIGENT):
+Text that makes REAL POINTS with:
+- Novel distinctions/insights (not cliches)
+- Organic development (not just sequential listing)
+- System-level control (integrates earlier points into later ones)
+- Opens domains (doesn't shut down inquiry)
+- Direct writing (not evasive)
+- Technical terms that CLARIFY (not obfuscate)
+
+Examples that score 90+:
+• "It is shown (i) that causation exists, since we couldn't even ask whether causation existed unless it did; (ii) that any given case of causation is a case of persistence; and (iii) that spatiotemporal relations supervene on causal relations..."
+• "The philosopher is to the physicist what the physicist is to the engineer. The philosopher wants to know what it is for one thing to cause another—what it is that one knows in knowing that one thing made another happen."
+• "Frege's legacy: When people have an obviously correct belief that seems to have an absurd consequence, they should ask whether that absurdity really is a consequence. They frequently don't. Instead they accept the absurdity and develop ad hoc hypotheses that undermine their own belief system."
+
+IF THE TEXT MAKES REAL POINTS AND DEVELOPS IDEAS ORGANICALLY, IT SCORES 90+. PERIOD.
 
 ANSWER FORMAT:
 Score: [number 0-100]

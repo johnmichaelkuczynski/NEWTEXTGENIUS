@@ -2,8 +2,9 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, RefreshCw } from 'lucide-react';
+import { Download, RefreshCw, Copy } from 'lucide-react';
 import { AnalysisResult } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
 
 interface ResultsDisplayProps {
   results: AnalysisResult | null;
@@ -14,11 +15,27 @@ interface ResultsDisplayProps {
 
 export function ResultsDisplay({ results, isVisible, onDownloadReport, onNewAnalysis }: ResultsDisplayProps) {
   if (!isVisible || !results) return null;
+  const { toast } = useToast();
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}m ${secs}s`;
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast({
+        title: "Copied to clipboard",
+        description: "Analysis transcript copied successfully",
+      });
+    }).catch(() => {
+      toast({
+        title: "Copy failed",
+        description: "Could not copy to clipboard",
+        variant: "destructive",
+      });
+    });
   };
 
   return (
@@ -111,10 +128,21 @@ export function ResultsDisplay({ results, isVisible, onDownloadReport, onNewAnal
           {results.streamingTranscript && (
             <Card className="border-2 border-primary-200 bg-gray-50 mb-6">
               <CardContent className="p-6">
-                <h4 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-                  <span className="mr-2">📝</span>
-                  Live Analysis Transcript
-                </h4>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-xl font-bold text-gray-900 flex items-center">
+                    <span className="mr-2">📝</span>
+                    Live Analysis Transcript
+                  </h4>
+                  <Button
+                    onClick={() => copyToClipboard(results.streamingTranscript || '')}
+                    variant="outline"
+                    size="sm"
+                    data-testid="copy-transcript"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy
+                  </Button>
+                </div>
                 <div 
                   className="bg-white border border-gray-200 rounded-lg p-6 max-h-96 overflow-y-auto font-mono text-sm text-gray-800 whitespace-pre-wrap"
                   data-testid="streaming-transcript"

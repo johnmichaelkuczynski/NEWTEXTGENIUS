@@ -1,0 +1,74 @@
+1.2 The relationship of philosophy to other disciplines
+The philosopher is interested in the laws governing the laws. He doesn’t want to know what in fact holds. He wants to know what it would even make sense to claim to hold. He wants to know the laws that the laws can’t break.
+Philosophical knowledge is metaknowledge—knowledge about knowledge. The non-philosopher wants to know specifics. What happened? When did it happen? What did it cause? How did it cause it? The philosopher is interested in these questions only to the extent that knowing the answers to them helps him understand the categories (cause, place, time, etc.) underlying such knowledge.
+The stranded motorist wants his car to work. He doesn’t care what will get it to do so. The engineer is interested in this. But the engineer is not entirely innocent of the motorist’s epistemic parochialism. The engineer has no interest in what the laws of physics are except in so far as he must know them to create the right mechanisms. But the physicist wants knowledge of the mechanisms only to the extent it will give him knowledge of the laws embodied therein. 
+The philosopher is to the physicist what the physicist is to the engineer and, therefore, what the engineer is to the stranded motorist. The philosopher wants to know what causes what and what mechanisms were involved only to the extent that knowing this helps him understand what it is for one thing to cause another— only, that is to say, in so far as it helps him know what it is that one knows in knowing that one thing made another happen.
+1.3 How is analytic philosophy different from non-analytic philosophy?
+John Stuart Mill (1806–1873), the great philosopher and economist, said that he was an expert in but one science, that being the science of science. What he meant was obviously similar to what we’ve been saying. And it was similar, therefore, to what Gottlob Frege (1848–1925), the great philosopher and mathematical logician, meant when he said that logic studies not the laws of nature but the “laws of the laws of nature.” Whether Frege was right depends on what exactly one means by “logic.” But if, by “logic,” he meant “philosophy,” then Frege’s dictum was spot-on.
+Frege is often described as the first analytic philosopher. Michael Dummett (1925–), an exceptionally capable contemporary philosopher of language, said that “analytic philosophy is post-Fregean philosophy.”  What does Dummett mean?
+With some exceptions, pre-Fregean philosophers thought they were studying the most general features of the actual world. They thought that, like the botanist, they were in the business of saying how the world is, the only difference between their work and the botanist’s being that theirs is concerned with more general features of reality than the botanist’s.
+Frege showed that this is wrong. Any interest that botanists have in plants that might exist, but don’t, is subordinate to their interest in what plants actually exist. Like all scientists, they are interested in what there could be only to the extent that it helps them figure out what there is. But with philosophers, it’s the other way around. Any interest they have in the actual is subordinate to their interest in the possible.
+ 
+Unlike non-analytic philosophers, analytic philosophers figure out what there could be by analyzing statements. Statements that make sense are those that an be true, and statements that don’t are those that can’t. Therefore, statements that make sense describe possible realities and those that don’t don’t. 
+But what exactly did Frege do?
+2.0 Frege’s key insight: Logical form ≠grammatical form
+Frege’s legacy to philosophy can be summed up thus:
+
+(FL)  When people have an obviously correct belief that seems to have an absurd consequence, they should ask themselves whether that absurdity really is a consequence of that belief. But they frequently don’t. Instead they accept the absurdity and, in order to make this mistake of theirs work, they develop ad hoc hypotheses as to the nature of reality that undermine the integrity of their own belief system.
+Consider the statement:
+
+(SC) nothing is a square circle.
+
+SC is true. Everybody knows this. But what does SC say? Judging by its grammatical similarity to “Smith is a very capable lawyer,” which attributes a certain property (that of being a capable lawyer) to a certain individual (Smith), SC would seem to say that a certain entity has the property of being a square circle. Presumably, the entity in question is some non-entity. If this presumption is correct, SC says that:
+
+(SC*) some non-entity, some featureless un-thing, is a circle.
+
+But SC* is doubly incoherent. If anything is a square circle, then SC is false—it being irrelevant how much of a cipher the entity in question is. Second, the very idea of a non-entity is an absurd one. But it’s hard to find a layperson or scholar who, when asked what SC means, comes up with anything substantively different from SC*.
+Given what a rank absurdity SC* is, we can’t accept it, even though it seems to be an obvious consequence of SC. But we can’t reject SC, since it’s an obvious truth.
+To get out of this jam, we need only reflect a bit on what our words mean. If you say that nobody likes Larry, you’re not saying that some un-person likes Larry. You’re saying that if you gathered together all the people who liked Larry and put them in an otherwise empty room, that room would remain empty. Which is the same as saying that, if you put all the people in existence in an otherwise empty room, there would be no things that liked Larry in that room.
+Thus, what “nobody likes Larry” means is not that some un-person likes Larry, and is instead that the set of people who like Larry is empty or, alternatively, that the set of people doesn’t overlap with the set of things that like Larry.
+SC is to be understood along similar lines. If you put all the square circles in existence in an otherwise empty room, that room would remain empty. This is another way of saying that, if you put all the square things in an otherwise empty room, there would be no circles in that room. So SC says, not some un-thing is a circle, but that
+
+(i) the set of things that are both circular and square is an empty one
+
+or, alternatively, that
+
+(ii) the set of circles doesn’t overlap with the set of squares.
+ 
+(i) is a way of saying that any given thing lacks the property of being both a circle and a square. Alternatively, it’s a way of saying this property doesn’t have any instances—that it’s uninstantiated. (ii) is a way of saying that anything having the property of being a square lacks the property of being a circle. Alternatively, it’s a way of saying that these two properties don’t have any instances in common—that they are not coinstantiated.
+(i) and (ii) thus attribute properties to properties. They say, respectively, that the property of being both a square and a circle is uninstantiated and that the properties of being a square and of being a circle are not coinstantiated.
+Since (i) and (ii) are just different ways of saying what SC says, the latter doesn’t make the absurd statement that some non-entity is a circle, and it instead makes the innocuous statement that the set of squares doesn’t overlap with the set of circles or, alternatively, that the property of being a square circle is uninstantiated.
+What this shows is that, in at least some cases, philosophical insight is acquired, not by doing parascience, but by analyzing meanings—not by positing entities, but by clarifying statements. 
+Analytic philosophy is philosophy that is driven by accep-tance of FL. Let us now expand on FL and make it clear why it’s true.
+2.1 The wrong way to react to grammatical surface-structure
+In respect of its grammatical form,
+
+(JS) “John smokes”
+
+is comparable to
+
+(MS) “Mary smokes.”
+
+JS attributes the property of being a smoker to John; MS attributes that property to Mary.
+In respect of its grammatical form, each of JS and MS is comparable to:
+
+(LJ) “Larry juggles”
+
+and also to
+
+(JJ) “Jane jogs.”
+
+Each of these sentences says of some individual that he or she has a certain property. The obvious inference to make is that any sentence grammatically comparable to any one of those of four sentences says of some individual that he or she (or it) has some property.
+In light of these points, consider the sentence:
+
+(SS) Someone smokes.
+
+Given what we just said, the obvious thing to say about it is that it attributes the property of smoking to some individual. But which individual could that be? Which individual does “someone” pick out?
+“It picks out an ambiguous person,” said one logician.  But this answer is no good. Words are ambiguous, not people. “Bank” is ambiguous, since it has two meanings. But I’m not ambiguous, and neither are you. And if per impossibile there did exist some ambiguous person—some blank, featureless shell of a person who was picked out by “someone”—SS would unambiguously say of  that person that he or she smoked.  But there clearly
+ 
+isn’t any one person to whom SS attributes the property of smoking. This is easily shown.  If Smith smokes, the sentence: “someone smokes but Smith does not”
+
+will be false. But it won’t be self-contradictory; it won’t be like “Smith smokes but Smith does not smoke.” (For a statement to be self-contradictory is for it to bear two mutually opposed meanings.) Of course, there isn’t anything special about the name “Smith,” what we just said could have been said in connection with Jones or Brown or any other expression that refers to some individual. Thus, there is no individual N such that it is self-contradictory to say that someone smokes but N does not. Therefore “someone” doesn’t refer to anyone.
+“But you’ve misunderstood my thesis” it will be said. “The word “someone” doesn’t unambiguously pick out an ambiguous person. It is itself ambiguous. It refers to Fred and Ethel and Mary. It refers to all people indifferently.”
+That’s false. “Someone” isn’t ambiguous; it isn’t like the word “dumb.” SS has one meaning, unlike “John is dumb,” which could mean either “John is unintelligent” or “John is mute.” Also, if “someone” were ambiguous between “John” and “Ethel” and so on, then, depending on the circumstances, it would be synonymous with “John smokes” or “Ethel smokes.” And in that case, “someone smokes, but John does not” would sometimes have the same meaning as “John smokes but John does not smoke,” in which case it would be self-contradictory. But, as we just saw, “someone smokes, but John does not” is not self-contradictory under any circumstances. If John does smoke, it will be false, but it won’t be self-contradictory.
+Also, it isn’t clear what it means to say that “someone” picks out everyone “indifferently.” But if, as is surely the case, picking out everyone indifferently involves picking out everyone, then it’s just wrong to say that “someone” picks out everyone “indifferently” (or in any other way). For if it did, it would have the same meaning as “everyone,” which it doesn’t. 
