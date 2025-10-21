@@ -3,8 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
 import { analysisRequestSchema, type AnalysisRequest } from "@shared/schema";
-import { getQuestions } from "./services/question-sets";
-import { LLMClients } from "./services/llm-clients";
+import { LLMClients } from "./services/llm-clients-new";
 import { TextProcessor } from "./services/text-processor";
 import { FileParser } from "./services/file-parser";
 
@@ -307,9 +306,6 @@ async function processAnalysisAsync(
     const assessmentMode = request.assessmentMode || 'normal';
     const assessmentType = request.assessmentType;
     console.log(`🔍 Assessment: ${assessmentType} | Mode: ${assessmentMode}`);
-    
-    const llmClient = new LLMClients();
-    // Questions are now defined in protocols.ts and handled by LLM client
 
     sendProgressUpdate(analysisId, {
       status: 'starting',
@@ -328,8 +324,7 @@ async function processAnalysisAsync(
       request.document1Text, 
       assessmentType,
       assessmentMode,
-      request.llmProvider, 
-      llmClient,
+      request.llmProvider,
       request.selectedChunks1,
       analysisId
     );
@@ -349,8 +344,7 @@ async function processAnalysisAsync(
         request.document2Text, 
         assessmentType,
         assessmentMode,
-        request.llmProvider, 
-        llmClient,
+        request.llmProvider,
         request.selectedChunks2,
         analysisId
       );
@@ -368,8 +362,7 @@ async function processAnalysisAsync(
         doc1Results,
         doc2Results,
         request.assessmentType,
-        request.llmProvider,
-        llmClient
+        request.llmProvider
       );
     }
 
@@ -414,12 +407,11 @@ async function processDocumentWithProtocol(
   assessmentType: 'cognitive' | 'psychological' | 'psychopathological',
   assessmentMode: 'normal' | 'comprehensive',
   provider: string,
-  llmClient: any, // Will be new LLM client
   selectedChunks?: number[],
   analysisId?: string
 ) {
-  const { LLMClients: NewLLMClients } = await import('./services/llm-clients-new');
-  const newClient = new NewLLMClients();
+  // Use the NEW protocol-compliant LLM client
+  const newClient = new LLMClients();
   
   const allChunks = TextProcessor.chunkText(text);
   const chunksToProcess = selectedChunks && selectedChunks.length > 0 
@@ -845,11 +837,10 @@ async function generateComparison(
   doc2Text: string,
   doc1Results: any[],
   doc2Results: any[],
-  evaluationParam: string,
-  provider: string,
-  llmClient: LLMClients
+  assessmentType: string,
+  provider: string
 ) {
-  const comparisonPrompt = `Compare these two documents based on ${evaluationParam}. 
+  const comparisonPrompt = `Compare these two documents based on ${assessmentType}. 
 
 Document 1 Results:
 ${JSON.stringify(doc1Results, null, 2)}
@@ -866,48 +857,26 @@ Provide a comparative analysis in JSON format:
   }
 }`;
 
-  try {
-    const result = await llmClient.analyzeText(provider, comparisonPrompt, 'Provide a comparative analysis');
-    
-    // Try to parse the explanation as JSON first
-    let comparisonResult;
-    try {
-      comparisonResult = JSON.parse(result.explanation);
-    } catch {
-      // If that fails, create a structured response
-      comparisonResult = {
-        explanation: result.explanation,
-        scores: {
-          document1: Math.round(doc1Results.reduce((sum, r) => sum + r.score, 0) / doc1Results.length),
-          document2: Math.round(doc2Results.reduce((sum, r) => sum + r.score, 0) / doc2Results.length)
-        }
-      };
-    }
-    
-    return comparisonResult;
-  } catch (error) {
-    console.error('Comparison generation error:', error);
-    // Generate a basic comparison based on the individual results
-    const doc1Avg = Math.round(doc1Results.reduce((sum, r) => sum + r.score, 0) / doc1Results.length);
-    const doc2Avg = Math.round(doc2Results.reduce((sum, r) => sum + r.score, 0) / doc2Results.length);
-    
-    let comparisonText = `Document 1 averaged ${doc1Avg}/100 across all evaluated criteria. Document 2 averaged ${doc2Avg}/100. `;
-    if (doc1Avg > doc2Avg) {
-      comparisonText += `Document 1 performed stronger overall, scoring ${doc1Avg - doc2Avg} points higher on average.`;
-    } else if (doc2Avg > doc1Avg) {
-      comparisonText += `Document 2 performed stronger overall, scoring ${doc2Avg - doc1Avg} points higher on average.`;
-    } else {
-      comparisonText += `Both documents performed similarly across the evaluated criteria.`;
-    }
-    
-    return {
-      explanation: comparisonText,
-      scores: {
-        document1: doc1Avg,
-        document2: doc2Avg
-      }
-    };
+  // Generate basic comparison based on scores
+  const doc1Avg = Math.round(doc1Results.reduce((sum, r) => sum + r.score, 0) / doc1Results.length);
+  const doc2Avg = Math.round(doc2Results.reduce((sum, r) => sum + r.score, 0) / doc2Results.length);
+  
+  let comparisonText = `Document 1 averaged ${doc1Avg}/100 across all evaluated criteria. Document 2 averaged ${doc2Avg}/100. `;
+  if (doc1Avg > doc2Avg) {
+    comparisonText += `Document 1 performed stronger overall, scoring ${doc1Avg - doc2Avg} points higher on average.`;
+  } else if (doc2Avg > doc1Avg) {
+    comparisonText += `Document 2 performed stronger overall, scoring ${doc2Avg - doc1Avg} points higher on average.`;
+  } else {
+    comparisonText += `Both documents performed similarly across the evaluated criteria.`;
   }
+  
+  return {
+    explanation: comparisonText,
+    scores: {
+      document1: doc1Avg,
+      document2: doc2Avg
+    }
+  };
 }
 
 function calculateOverallScore(doc1Results: any[], doc2Results?: any[]): number {
