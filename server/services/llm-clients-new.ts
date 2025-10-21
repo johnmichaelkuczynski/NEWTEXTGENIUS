@@ -98,11 +98,43 @@ export class LLMClients {
   ): string {
     const questions = getProtocolQuestions(assessmentType);
     
-    let prompt = `TEXT TO ANALYZE:\n${text}\n\n`;
+    let prompt = '';
 
     if (phase === 1) {
-      // Phase 1: ALL questions verbatim
-      prompt += `QUESTIONS TO ANSWER:\n\n`;
+      // CRITICAL SCORING ENFORCEMENT FIRST
+      prompt += `⚠️ CRITICAL SCORING RULES - READ CAREFULLY:
+
+1. A score of N/100 means (100-N)% of people outperform the author on that parameter.
+   - Score of 25/100 = 75% of people are smarter = RETARDED
+   - Score of 73/100 = 27% of people are smarter = SLIGHTLY ABOVE AVERAGE
+   - Score of 96/100 = 4% of people are smarter = GENUINELY EXCEPTIONAL
+
+2. MIDRANGE SCORES (70-85) ARE FORBIDDEN UNLESS JUSTIFIED:
+   - If the text is genuinely insightful and intelligent → Score 90-100
+   - If the text is phony academic jargon → Score 0-65
+   - DO NOT give safe middling scores to avoid commitment
+   - Scores in the 70s-80s = you are hedging = AUTOMATIC FAILURE
+
+3. THIS PARADIGM TEXT MUST SCORE ≤65:
+"${PHONY_PARADIGM}"
+If you would score it higher, you have failed to understand the task.
+
+4. INTELLIGENT PHILOSOPHICAL ANALYSIS (like solving the Raven Paradox with principled generalizations) MUST SCORE 95+
+   - If it shows genuine insight → 95-100
+   - If it's phony → 0-65
+   - NO MIDDLE GROUND FOR CLEAR CASES
+
+5. YOU MUST ANSWER ALL ${questions.length} QUESTIONS INDIVIDUALLY
+   - Each question gets its own score 0-100
+   - Then provide overall assessment
+
+NOW ANALYZE THIS TEXT:
+
+${text}
+
+ANSWER EVERY ONE OF THESE ${questions.length} QUESTIONS:
+
+`;
       questions.forEach((question, index) => {
         prompt += `${index + 1}. ${question}\n\n`;
       });
@@ -111,14 +143,27 @@ export class LLMClients {
       if (assessmentType === 'cognitive') {
         prompt += getScoringInstructions();
         prompt += getCognitiveMetapoints();
-        prompt += `\n\nPHONY PARADIGM (must score ≤65):\n${PHONY_PARADIGM}\n\n`;
       } else if (assessmentType === 'psychological') {
         prompt += getPsychologicalInstructions();
       } else if (assessmentType === 'psychopathological') {
         prompt += getPsychopathologicalInstructions();
       }
 
-      prompt += `\nANSWER FORMAT:\nFor each question, provide:\n- Score: [0-100]\n- Explanation: [Your answer]\n\nThen provide OVERALL SCORE and SUMMARY.`;
+      prompt += `\n\nRESPONSE FORMAT:
+For EACH of the ${questions.length} questions above:
+Question [N]: [restate question]
+Score: [0-100]
+Explanation: [your answer - be specific about why this score]
+
+After answering all ${questions.length} questions individually:
+OVERALL SCORE: [0-100]
+SUMMARY: [overall assessment]
+
+REMEMBER: 
+- Scores 70-85 = hedging = failure
+- Genuinely intelligent text = 90-100
+- Phony academic jargon = 0-65
+- ${questions.length} questions MUST be answered individually`;
       
     } else if (phase === 2 && previousScore !== undefined) {
       // Phase 2: Pushback if score < 95

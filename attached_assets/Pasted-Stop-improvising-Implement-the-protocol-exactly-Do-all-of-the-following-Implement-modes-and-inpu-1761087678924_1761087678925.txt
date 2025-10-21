@@ -1,0 +1,142 @@
+Stop improvising. Implement the protocol exactly. Do all of the following:
+
+Implement modes and input rules exactly as specified.
+
+Six modes; normal = Phase 1 only; comprehensive = Phases 1–4.
+
+For texts >1000 words, chunk into ~1000-word blocks and let me choose which chunks to analyze.
+
+Refer to the four providers as ZHI1–ZHI4 in the UI. 
+
+ALL SIX PROTOCOLS
+
+Phase-1 questions = use the exact list, no merges, no deletions.
+
+Ask every question in the Phase-1 list verbatim and require an answer + score 0–100 for each. 
+
+ALL SIX PROTOCOLS
+
+Inject the Addendum with every intelligence evaluation (Normal and Comprehensive).
+
+If initial answers don’t satisfy the Addendum’s standards, the LLM must revise/replace them.
+
+This instruction must be explicitly included on every run. 
+
+ALL SIX PROTOCOLS
+
+Enforce Phases 2–4 in Comprehensive mode.
+
+Phase 3: Walmart metric = if the score is N/100, app must state what the (100–N)% “outperformers” know/do that the author doesn’t—concretely.
+
+If the app can’t articulate that, it must revise the score.
+
+Phase 4: final validation checklist before freezing scores. 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+Hard pass/fail benchmarks — wire these as automated tests.
+
+If the “transcendental empiricism” passage (and relevantly similar passages) receive >65 (or >70 for similar ones), the app fails.
+
+If the “red object / extended object” paragraph (and relevantly similar) receives <96, the app fails.
+
+Implement these as unit tests that run on deploy; block releases if they fail. 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+Scoring semantics — enforce in code.
+
+N/100 means (100–N)% outperform. The UI must show this interpretation next to each score and the app must honor it in Phase 2 challenges.
+
+Remove “safe midrange” habits: mid-70s/80s can’t be default. Either justify via the Walmart metric or revise. 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+Deterministic protocol runner.
+
+For each run:
+(a) Ask all Phase-1 questions verbatim.
+(b) Attach Addendum.
+(c) If Comprehensive: run Pushback, Walmart, Final Validation in order.
+
+Refuse to emit results if any required item is missing.
+
+Provider handling.
+
+Expose a selector ZHI1–ZHI4; never rename them to vendor names in the UI.
+
+Run the exact same prompts for each selected model; no hidden differences. 
+
+ALL SIX PROTOCOLS
+
+Output contract.
+
+For each question: Question text → Answer paragraph → Score (0–100) → “Outperformed by: X%”.
+
+At end (Comprehensive): include the Walmart justification block and final validation checklist decisions (yes/no bullets).
+
+Allow download as .txt. 
+
+ALL SIX PROTOCOLS
+
+UI/UX constraints.
+
+White, bright, spacious UI; show mode, chunk selector, model selector, and a “Run Protocol” button. 
+
+ALL SIX PROTOCOLS
+
+Automated acceptance suite (must pass before merge/deploy).
+
+Test A: Feed the “transcendental empiricism” passage → expect fail if any score >65 (>70 for similar).
+
+Test B: Feed the “red object / extended object” paragraph → expect all relevant scores ≥96.
+
+Test C: Drop any question from Phase-1 → runner must refuse to produce results and show “Protocol incomplete.”
+
+Test D: Comprehensive mode: omit Walmart justification → runner must block finalization until filled. 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+ 
+
+ALL SIX PROTOCOLS
+
+Developer discipline.
+
+No “simplified lists,” no merging questions, no style grading, no invented metrics. Use the protocol text only.
+
+Re-read and implement exactly as written. 
+
+ALL SIX PROTOCOLS
+
+📌 One-line instruction to pin to the task:
+
+“Rebuild the evaluator to run my protocol verbatim (modes, full question set, Addendum, Phases 2–4, Walmart, Final Validation), enforce the benchmark pass/fail tests on deploy, and block any output that omits a required step. No simplification. No midrange hedging. Follow my document to the letter.”
