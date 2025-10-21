@@ -15,18 +15,18 @@ import { AnalysisRequest, AnalysisResult } from '@shared/schema';
 
 interface AnalysisConfig {
   documentMode: 'single' | 'dual';
-  llmProvider: 'anthropic' | 'openai' | 'perplexity' | 'deepseek';
-  evaluationParam: 'originality' | 'intelligence' | 'cogency' | 'quality';
-  analysisMode: 'quick' | 'comprehensive';
+  llmProvider: 'zhi1' | 'zhi2' | 'zhi3' | 'zhi4';
+  assessmentType: 'cognitive' | 'psychological' | 'psychopathological';
+  assessmentMode: 'normal' | 'comprehensive';
 }
 
 export default function Home() {
   const { toast } = useToast();
   const [config, setConfig] = useState<AnalysisConfig>({
     documentMode: 'single',
-    llmProvider: 'anthropic',
-    evaluationParam: 'originality',
-    analysisMode: 'quick'
+    llmProvider: 'zhi2',
+    assessmentType: 'cognitive',
+    assessmentMode: 'normal'
   });
   const [document1Text, setDocument1Text] = useState('');
   const [document2Text, setDocument2Text] = useState('');
@@ -102,8 +102,8 @@ export default function Home() {
     const request: AnalysisRequest = {
       documentMode: config.documentMode,
       llmProvider: config.llmProvider,
-      evaluationParam: config.evaluationParam,
-      analysisMode: config.analysisMode,
+      assessmentType: config.assessmentType,
+      assessmentMode: config.assessmentMode,
       document1Text,
       document2Text: config.documentMode === 'dual' ? document2Text : undefined,
       selectedChunks1: selectedChunks1.length > 0 ? selectedChunks1 : undefined,
@@ -147,22 +147,25 @@ export default function Home() {
 
   const getLLMDisplayName = (provider: string) => {
     switch (provider) {
-      case 'anthropic': return 'ZHI 2';
-      case 'openai': return 'ZHI 3';
-      case 'perplexity': return 'ZHI 4';
-      case 'deepseek': return 'ZHI 1';
+      case 'zhi1': return 'ZHI 1';
+      case 'zhi2': return 'ZHI 2';
+      case 'zhi3': return 'ZHI 3';
+      case 'zhi4': return 'ZHI 4';
       default: return provider;
     }
   };
 
-  const getParamDisplayName = (param: string) => {
-    switch (param) {
-      case 'originality': return 'Originality';
-      case 'intelligence': return 'Intelligence';
-      case 'cogency': return 'Cogency';
-      case 'quality': return 'Overall Quality';
-      default: return param;
+  const getAssessmentDisplayName = (type: string) => {
+    switch (type) {
+      case 'cognitive': return 'Cognitive Capability';
+      case 'psychological': return 'Psychological Characteristics';
+      case 'psychopathological': return 'Psychopathology';
+      default: return type;
     }
+  };
+  
+  const getModeDisplayName = (mode: string) => {
+    return mode === 'normal' ? 'Normal (Phase 1 only)' : 'Comprehensive (Phases 1-4)';
   };
 
   return (
@@ -222,9 +225,9 @@ export default function Home() {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Analyze</h3>
                 <p className="text-sm text-gray-600">
-                  Analyzing for <span className="font-medium text-primary-600">{getParamDisplayName(config.evaluationParam)}</span>{' '}
+                  Analyzing for <span className="font-medium text-primary-600">{getAssessmentDisplayName(config.assessmentType)}</span>{' '}
                   using <span className="font-medium text-primary-600">{getLLMDisplayName(config.llmProvider)}</span>{' '}
-                  in <span className="font-medium text-primary-600">{config.analysisMode}</span> mode
+                  <br/><span className="font-medium text-primary-600">{getModeDisplayName(config.assessmentMode)}</span>
                 </p>
               </div>
               <Button
@@ -244,7 +247,7 @@ export default function Home() {
           isVisible={isAnalyzing || !!progress}
           currentStep={(() => {
             // For quick mode: pass question index directly (1-3)
-            if (config.analysisMode === 'quick') {
+            if (config.assessmentMode === 'normal') {
               return progress?.questionIndex || 1;
             }
             // For comprehensive mode: map questions to phases (1-4)
@@ -253,7 +256,7 @@ export default function Home() {
             const questionsPerPhase = Math.ceil(totalQuestions / 4);
             return Math.min(4, Math.ceil(questionIndex / questionsPerPhase));
           })()}
-          totalSteps={config.analysisMode === 'quick' ? 3 : 4}
+          totalSteps={config.assessmentMode === 'normal' ? 1 : 4}
           currentPhase={progress?.currentQuestion ? `Analyzing: ${progress.currentQuestion}` : progress?.message || "Processing Document - Analyzing text..."}
           currentAction={
             progress?.questionIndex && progress?.totalQuestions
@@ -264,7 +267,7 @@ export default function Home() {
                 }`
               : "Evaluating cognitive protocol..."
           }
-          showPhaseDetails={config.analysisMode === 'comprehensive'}
+          showPhaseDetails={config.assessmentMode === 'comprehensive'}
           onCancel={() => setIsAnalyzing(false)}
           streamingText={streamingText}
         />

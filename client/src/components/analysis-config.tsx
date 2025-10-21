@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 
 interface AnalysisConfig {
   documentMode: 'single' | 'dual';
-  llmProvider: 'anthropic' | 'openai' | 'perplexity' | 'deepseek';
-  evaluationParam: 'originality' | 'intelligence' | 'cogency' | 'quality';
-  analysisMode: 'quick' | 'comprehensive';
+  llmProvider: 'zhi1' | 'zhi2' | 'zhi3' | 'zhi4';
+  assessmentType: 'cognitive' | 'psychological' | 'psychopathological';
+  assessmentMode: 'normal' | 'comprehensive';
 }
 
 interface AnalysisConfigProps {
@@ -38,7 +38,7 @@ export function AnalysisConfigPanel({ config, onConfigChange }: AnalysisConfigPr
                 onClick={() => updateConfig('documentMode', 'single')}
                 data-testid="single-document-mode"
               >
-                Single Document
+                Single
               </Button>
               <Button
                 variant={config.documentMode === 'dual' ? 'default' : 'ghost'}
@@ -47,7 +47,7 @@ export function AnalysisConfigPanel({ config, onConfigChange }: AnalysisConfigPr
                 onClick={() => updateConfig('documentMode', 'dual')}
                 data-testid="dual-document-mode"
               >
-                Dual Document
+                Dual
               </Button>
             </div>
           </div>
@@ -60,49 +60,50 @@ export function AnalysisConfigPanel({ config, onConfigChange }: AnalysisConfigPr
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="anthropic">🧠 ZHI 1</SelectItem>
-                <SelectItem value="openai">🤖 ZHI 2</SelectItem>
-                <SelectItem value="deepseek">🔬 ZHI 3</SelectItem>
-                <SelectItem value="perplexity">🔍 ZHI 4</SelectItem>
+                <SelectItem value="zhi1">ZHI 1</SelectItem>
+                <SelectItem value="zhi2">ZHI 2</SelectItem>
+                <SelectItem value="zhi3">ZHI 3</SelectItem>
+                <SelectItem value="zhi4">ZHI 4</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Evaluation Parameter */}
+          {/* Assessment Type - NEW 6 MODE SYSTEM */}
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-3">Evaluation Parameter</Label>
-            <Select value={config.evaluationParam} onValueChange={(value) => updateConfig('evaluationParam', value)}>
-              <SelectTrigger data-testid="evaluation-param-select">
+            <Label className="block text-sm font-medium text-gray-700 mb-3">Assessment Type</Label>
+            <Select value={config.assessmentType} onValueChange={(value) => updateConfig('assessmentType', value)}>
+              <SelectTrigger data-testid="assessment-type-select">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="originality">✨ Originality</SelectItem>
-                <SelectItem value="intelligence">🧠 Intelligence</SelectItem>
-                <SelectItem value="cogency">🎯 Cogency</SelectItem>
-                <SelectItem value="quality">⭐ Overall Quality</SelectItem>
+                <SelectItem value="cognitive">Cognitive Capability</SelectItem>
+                <SelectItem value="psychological">Psychological Characteristics</SelectItem>
+                <SelectItem value="psychopathological">Psychopathology</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Analysis Mode */}
+          {/* Assessment Mode */}
           <div>
-            <Label className="block text-sm font-medium text-gray-700 mb-3">Analysis Mode</Label>
+            <Label className="block text-sm font-medium text-gray-700 mb-3">Assessment Mode</Label>
             <div className="flex bg-gray-100 rounded-lg p-1">
               <Button
-                variant={config.analysisMode === 'quick' ? 'default' : 'ghost'}
+                variant={config.assessmentMode === 'normal' ? 'default' : 'ghost'}
                 size="sm"
                 className="flex-1"
-                onClick={() => updateConfig('analysisMode', 'quick')}
-                data-testid="quick-analysis-mode"
+                onClick={() => updateConfig('assessmentMode', 'normal')}
+                data-testid="normal-assessment-mode"
+                title="Phase 1 only"
               >
-                Quick (~30s)
+                Normal
               </Button>
               <Button
-                variant={config.analysisMode === 'comprehensive' ? 'default' : 'ghost'}
+                variant={config.assessmentMode === 'comprehensive' ? 'default' : 'ghost'}
                 size="sm"
                 className="flex-1"
-                onClick={() => updateConfig('analysisMode', 'comprehensive')}
-                data-testid="comprehensive-analysis-mode"
+                onClick={() => updateConfig('assessmentMode', 'comprehensive')}
+                data-testid="comprehensive-assessment-mode"
+                title="Phases 1-4"
               >
                 Comprehensive
               </Button>
