@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
-import { Send, MessageCircle, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Send, Sparkles } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 
 interface Message {
@@ -16,7 +16,6 @@ interface AIChatProps {
 }
 
 export function AIChat({ documentText, analysisResults }: AIChatProps) {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -69,105 +68,84 @@ export function AIChat({ documentText, analysisResults }: AIChatProps) {
     }
   };
 
-  if (!isOpen) {
-    return (
-      <div className="fixed bottom-4 right-4 z-50">
-        <Button
-          onClick={() => setIsOpen(true)}
-          className="rounded-full w-16 h-16 shadow-2xl bg-primary-600 hover:bg-primary-700 text-lg font-bold"
-          data-testid="open-chat"
-        >
-          💬
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <Card className="fixed bottom-4 right-4 w-[500px] h-[700px] shadow-2xl z-50 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b bg-primary-600 text-white rounded-t-lg">
-        <div className="flex items-center space-x-2">
-          <MessageCircle className="h-5 w-5" />
-          <h3 className="font-semibold">AI Chat - Instant Feedback</h3>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsOpen(false)}
-            className="text-white hover:bg-primary-700 h-8 w-8 p-0"
-            data-testid="close-chat"
-          >
-            <ChevronDown className="h-5 w-5" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+    <div className="flex flex-col h-full bg-white">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto bg-gray-50 p-6">
         {messages.length === 0 && (
-          <div className="text-center text-gray-500 text-sm mt-8">
-            <p className="font-bold text-base mb-2">💬 Lightning Fast AI Feedback</p>
-            <p className="mt-2">Paste huge documents, ask anything.</p>
-            <p className="mt-1">No restrictions. Full context.</p>
-            <p className="mt-1 text-xs text-primary-600">Supports 900+ page documents!</p>
+          <div className="text-center text-gray-500 py-12">
+            <Sparkles className="h-16 w-16 text-primary-600 mx-auto mb-4" />
+            <p className="text-lg font-semibold text-gray-900 mb-2">Start a conversation</p>
+            <p className="text-sm">Ask me anything or send your input/output text for discussion</p>
           </div>
         )}
-        {messages.map((msg, idx) => (
-          <div
-            key={idx}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        
+        <div className="max-w-4xl mx-auto space-y-4">
+          {messages.map((msg, idx) => (
             <div
-              className={`max-w-[85%] rounded-lg px-4 py-2 ${
-                msg.role === 'user'
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-900'
-              }`}
+              key={idx}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-lg px-4 py-2">
-              <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div
+                className={`max-w-[80%] rounded-lg px-5 py-3 ${
+                  msg.role === 'user'
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-white border-2 border-gray-200 text-gray-900'
+                }`}
+              >
+                <p className="text-sm font-semibold mb-1 opacity-75">
+                  {msg.role === 'user' ? 'You' : 'AI'}
+                </p>
+                <p className="whitespace-pre-wrap">{msg.content}</p>
               </div>
             </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
+          ))}
+          
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-white border-2 border-gray-200 rounded-lg px-5 py-3">
+                <div className="flex space-x-2">
+                  <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-primary-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t bg-white rounded-b-lg">
-        <div className="flex space-x-2">
-          <Textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Paste document or ask question..."
-            className="resize-none"
-            rows={3}
-            disabled={isLoading}
-            data-testid="chat-input"
-          />
-          <Button
-            onClick={sendMessage}
-            disabled={!input.trim() || isLoading}
-            className="bg-primary-600 hover:bg-primary-700 shrink-0"
-            data-testid="send-message"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      {/* Input Area */}
+      <div className="border-t bg-white p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex gap-3">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type, paste, or upload text (Word/PDF supported)..."
+              className="resize-none text-base"
+              rows={3}
+              disabled={isLoading}
+              data-testid="chat-input"
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={!input.trim() || isLoading}
+              className="bg-primary-600 hover:bg-primary-700 px-6 text-base font-semibold"
+              data-testid="send-message"
+            >
+              <Send className="h-5 w-5 mr-2" />
+              Send
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Press Enter to send • Shift+Enter for new line • +Ctrl to send input to Chat
+          </p>
         </div>
-        <p className="text-xs text-gray-500 mt-2">Press Enter to send • Shift+Enter for new line</p>
       </div>
-    </Card>
+    </div>
   );
 }

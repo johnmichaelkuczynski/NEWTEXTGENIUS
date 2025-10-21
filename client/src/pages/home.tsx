@@ -280,11 +280,26 @@ export default function Home() {
           onNewAnalysis={handleNewAnalysis}
         />
 
-        {/* AI Chat Assistant - FULL CONTEXT, ON SAME PAGE */}
-        <AIChat 
-          documentText={document1Text}
-          analysisResults={analysis}
-        />
+        {/* BIG AI CHAT SECTION - ALWAYS VISIBLE */}
+        <Card className="mt-8">
+          <CardContent className="p-0">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white p-6">
+              <h2 className="text-2xl font-bold flex items-center gap-3">
+                <MessageSquare className="h-8 w-8" />
+                AI Chat - Lightning Fast Feedback
+              </h2>
+              <p className="text-primary-100 mt-2">
+                Paste huge documents, ask anything, get instant intelligent responses. No restrictions, full context.
+              </p>
+            </div>
+            <div className="h-[600px]">
+              <AIChat 
+                documentText={document1Text}
+                analysisResults={analysis}
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
