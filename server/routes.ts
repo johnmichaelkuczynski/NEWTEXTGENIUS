@@ -892,7 +892,7 @@ function calculateOverallScore(doc1Results: any[], doc2Results?: any[]): number 
 
 function generateTextReport(analysis: any): string {
   const results = analysis.results;
-  let report = `ORIGINALITY METER ANALYSIS REPORT\n`;
+  let report = `TEXT GENIUS ANALYSIS REPORT\n`;
   report += `=====================================\n\n`;
   report += `Analysis ID: ${analysis.id}\n`;
   report += `Date: ${new Date(analysis.createdAt).toLocaleString()}\n`;

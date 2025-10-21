@@ -176,7 +176,7 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Microscope className="text-primary-600 h-8 w-8 mr-3" />
-              <h1 className="text-xl font-bold text-gray-900">Originality Meter</h1>
+              <h1 className="text-xl font-bold text-gray-900">Text Genius</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-500">Advanced Text Analysis</span>

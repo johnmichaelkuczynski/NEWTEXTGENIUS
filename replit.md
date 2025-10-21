@@ -1,4 +1,4 @@
-# Originality Meter
+# Text Genius
 
 ## Overview
 
