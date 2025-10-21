@@ -57,7 +57,7 @@ export function FileUpload({ onFileSelect, onTextChange, text, accept = '.txt,.d
           value={text}
           onChange={(e) => onTextChange(e.target.value)}
           placeholder="Type or paste your text here for analysis..."
-          className="w-full h-64 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500 resize-none"
+          className="w-full min-h-[600px] px-4 py-4 text-base border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-y"
           disabled={disabled}
           data-testid="text-input"
         />
