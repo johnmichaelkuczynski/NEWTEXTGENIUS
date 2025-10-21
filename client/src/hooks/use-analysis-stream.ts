@@ -177,20 +177,13 @@ export function useAnalysisStream(analysisId: string | null) {
     eventSource.onerror = (err) => {
       console.error('EventSource error:', err);
       setIsConnected(false);
+      eventSource.close();
       
       // Handle reconnection for non-complete analyses
       if (!isComplete && reconnectAttempts < maxReconnectAttempts) {
-        setReconnectAttempts(prev => prev + 1);
-        setError(`Connection lost, reconnecting... (${reconnectAttempts + 1}/${maxReconnectAttempts})`);
-        
-        // Reconnect after a delay
-        setTimeout(() => {
-          if (!isComplete) {
-            console.log(`Attempting reconnection ${reconnectAttempts + 1}/${maxReconnectAttempts}`);
-            eventSource.close();
-            // This will trigger the useEffect to reconnect
-          }
-        }, 2000);
+        const nextAttempt = reconnectAttempts + 1;
+        setError(`Connection lost, reconnecting... (${nextAttempt}/${maxReconnectAttempts})`);
+        setReconnectAttempts(nextAttempt);
       } else {
         setError('Connection error - analysis may still be running in background');
       }
@@ -204,7 +197,15 @@ export function useAnalysisStream(analysisId: string | null) {
     let reconnectTimeout: NodeJS.Timeout | undefined;
 
     if (analysisId && !isComplete) {
-      eventSource = connectToStream();
+      // If reconnecting (reconnectAttempts > 0), add a delay
+      if (reconnectAttempts > 0) {
+        reconnectTimeout = setTimeout(() => {
+          console.log(`Reconnecting attempt ${reconnectAttempts}/${maxReconnectAttempts}`);
+          eventSource = connectToStream();
+        }, 2000);
+      } else {
+        eventSource = connectToStream();
+      }
     }
 
     return () => {
@@ -216,7 +217,7 @@ export function useAnalysisStream(analysisId: string | null) {
         clearTimeout(reconnectTimeout);
       }
     };
-  }, [analysisId, isComplete, connectToStream, reconnectAttempts]);
+  }, [analysisId, isComplete, connectToStream, reconnectAttempts, maxReconnectAttempts]);
 
   // Reset state when analysisId changes
   useEffect(() => {
