@@ -298,4 +298,34 @@ SUMMARY: [comprehensive assessment]
     console.warn('Could not extract score from LLM response, using fallback');
     return 70;
   }
+
+  /**
+   * Simple chat interface - unrestricted direct access
+   */
+  async chat(
+    message: string,
+    systemPrompt: string,
+    conversationHistory: Array<{ role: string; content: string }>
+  ): Promise<string> {
+    if (!this.anthropic) throw new Error('Anthropic API key not configured');
+
+    // Build messages array from conversation history
+    const messages: Array<{ role: 'user' | 'assistant'; content: string }> = [
+      ...conversationHistory.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content
+      })),
+      { role: 'user' as const, content: message }
+    ];
+
+    const response = await this.anthropic.messages.create({
+      model: DEFAULT_ANTHROPIC_MODEL,
+      max_tokens: 4000,
+      system: systemPrompt,
+      messages: messages,
+    });
+
+    const textContent = response.content.find(block => block.type === 'text');
+    return textContent && 'text' in textContent ? textContent.text : 'No response generated';
+  }
 }

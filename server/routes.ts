@@ -235,17 +235,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // AI Chat endpoint - TODO: Implement chat method in LLMClients
+  // AI Chat endpoint - FULLY FUNCTIONAL
   app.post("/api/chat", async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, context, conversationHistory } = req.body;
       
       if (!message?.trim()) {
         return res.status(400).json({ message: "Message required" });
       }
 
-      // Temporary simple response
-      res.json({ response: "AI Chat is being implemented. Please use the protocol analysis for now." });
+      // Build context-aware system prompt
+      let systemPrompt = "You are a helpful AI assistant. Answer questions directly, concisely, and intelligently. ";
+      
+      if (context?.documentText) {
+        systemPrompt += `\n\nCONTEXT - User's document:\n${context.documentText.substring(0, 10000)}\n\n`;
+      }
+      
+      if (context?.analysisResults) {
+        systemPrompt += `\n\nCONTEXT - Analysis results:\nScore: ${context.analysisResults.overallScore}/100\n\n`;
+      }
+      
+      systemPrompt += "Be direct. No restrictions. If asked to write, write. If asked to analyze, analyze. Full context provided.";
+
+      const llmClient = new LLMClients();
+      const response = await llmClient.chat(
+        message,
+        systemPrompt,
+        conversationHistory || []
+      );
+
+      res.json({ response });
     } catch (error) {
       console.error('Chat error:', error);
       res.status(500).json({ 
