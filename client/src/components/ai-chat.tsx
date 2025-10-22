@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, ArrowUp } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
 interface Message {
@@ -13,13 +14,15 @@ interface Message {
 interface AIChatProps {
   documentText?: string;
   analysisResults?: any;
+  onSendToInput?: (text: string) => void;
 }
 
-export function AIChat({ documentText, analysisResults }: AIChatProps) {
+export function AIChat({ documentText, analysisResults, onSendToInput }: AIChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,8 +78,16 @@ export function AIChat({ documentText, analysisResults }: AIChatProps) {
         {messages.length === 0 && (
           <div className="text-center text-gray-500 py-12">
             <Sparkles className="h-16 w-16 text-primary-600 mx-auto mb-4" />
-            <p className="text-lg font-semibold text-gray-900 mb-2">Start a conversation</p>
-            <p className="text-sm">Ask me anything or send your input/output text for discussion</p>
+            <p className="text-lg font-semibold text-gray-900 mb-2">AI Chat - Full Context Awareness</p>
+            <p className="text-sm max-w-lg mx-auto">
+              I can see your document AND its analysis results. Ask me to:
+            </p>
+            <ul className="text-sm text-left max-w-md mx-auto mt-3 space-y-1 text-gray-700">
+              <li>✓ "Make this smarter"</li>
+              <li>✓ "Rewrite to score 95+"</li>
+              <li>✓ "What's wrong with my text?"</li>
+              <li>✓ "Make it more original/cogent/insightful"</li>
+            </ul>
           </div>
         )}
         
@@ -86,17 +97,37 @@ export function AIChat({ documentText, analysisResults }: AIChatProps) {
               key={idx}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-[80%] rounded-lg px-5 py-3 ${
-                  msg.role === 'user'
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-white border-2 border-gray-200 text-gray-900'
-                }`}
-              >
-                <p className="text-sm font-semibold mb-1 opacity-75">
-                  {msg.role === 'user' ? 'You' : 'AI'}
-                </p>
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+              <div className={`max-w-[80%] ${msg.role === 'assistant' ? 'space-y-2' : ''}`}>
+                <div
+                  className={`rounded-lg px-5 py-3 ${
+                    msg.role === 'user'
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-white border-2 border-gray-200 text-gray-900'
+                  }`}
+                >
+                  <p className="text-sm font-semibold mb-1 opacity-75">
+                    {msg.role === 'user' ? 'You' : 'AI'}
+                  </p>
+                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                </div>
+                {msg.role === 'assistant' && onSendToInput && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      onSendToInput(msg.content);
+                      toast({
+                        title: "Sent to input box",
+                        description: "AI response has been added to the document input for analysis",
+                      });
+                    }}
+                    className="text-primary-600 hover:text-primary-700 hover:bg-primary-50"
+                    data-testid={`send-to-input-${idx}`}
+                  >
+                    <ArrowUp className="h-4 w-4 mr-1" />
+                    Send to Analysis
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -142,7 +173,7 @@ export function AIChat({ documentText, analysisResults }: AIChatProps) {
             </Button>
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            💡 Press Enter to send • Shift+Enter for new line • +Ctrl to send input to Chat
+            💡 Press Enter to send • Shift+Enter for new line • I see your document + analysis results
           </p>
         </div>
       </div>

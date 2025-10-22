@@ -296,6 +296,7 @@ export default function Home() {
               <AIChat 
                 documentText={document1Text}
                 analysisResults={analysis}
+                onSendToInput={(text) => setDocument1Text(text)}
               />
             </div>
           </CardContent>

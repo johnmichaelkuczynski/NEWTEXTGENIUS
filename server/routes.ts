@@ -245,17 +245,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Build context-aware system prompt
-      let systemPrompt = "You are a helpful AI assistant. Answer questions directly, concisely, and intelligently. ";
+      let systemPrompt = "You are a brilliant AI assistant with FULL CONTEXT of the user's document and its analysis. ";
       
       if (context?.documentText) {
-        systemPrompt += `\n\nCONTEXT - User's document:\n${context.documentText.substring(0, 10000)}\n\n`;
+        systemPrompt += `\n\n📄 USER'S DOCUMENT (Full Context):\n${context.documentText.substring(0, 10000)}\n\n`;
       }
       
       if (context?.analysisResults) {
-        systemPrompt += `\n\nCONTEXT - Analysis results:\nScore: ${context.analysisResults.overallScore}/100\n\n`;
+        const score = context.analysisResults.overallScore || 0;
+        systemPrompt += `\n\n📊 ANALYSIS RESULTS:\n`;
+        systemPrompt += `Overall Score: ${score}/100\n`;
+        systemPrompt += `This means ${100 - score}% of people outperform this text on the measured parameters.\n\n`;
+        
+        if (context.analysisResults.results && context.analysisResults.results.length > 0) {
+          systemPrompt += `Detailed Findings:\n`;
+          context.analysisResults.results.slice(0, 3).forEach((r: any) => {
+            systemPrompt += `- ${r.question}: Score ${r.score}/100\n`;
+          });
+        }
       }
       
-      systemPrompt += "Be direct. No restrictions. If asked to write, write. If asked to analyze, analyze. Full context provided.";
+      systemPrompt += `\n\n💡 YOUR CAPABILITIES:
+- Rewrite the text to be smarter, more original, more cogent, more insightful
+- Explain what's wrong with the current text and how to fix it
+- Generate entirely new versions based on the user's goals
+- Answer any question about the text or analysis
+- No restrictions, no canned responses - full creative freedom
+
+Be DIRECT and HELPFUL. If they say "make it smarter", do it immediately. If they say "rewrite to score 95+", rewrite it.`;
 
       const llmClient = new LLMClients();
       const response = await llmClient.chat(
